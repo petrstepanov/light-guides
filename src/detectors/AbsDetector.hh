@@ -15,24 +15,24 @@
 
 class AbsDetector {
 public:
-	AbsDetector();
-	virtual ~AbsDetector();
+  AbsDetector();
+  virtual ~AbsDetector();
 
-	virtual G4String getName()=0;
-	virtual G4double getLength()=0;
-	virtual G4Material* getWindowMaterial()=0;
-	virtual G4Material* getCathodeMaterial()=0;
-	virtual G4double getWindowThickness()=0;
+  virtual G4String getName()=0;
+  virtual G4double getZSize()=0;
+  virtual G4double getXYSize()=0;
+  virtual G4Material* getWindowMaterial()=0;
+  virtual G4Material* getCathodeMaterial()=0;
+  virtual G4double getWindowThickness()=0;
 
-	virtual G4double getCathodeThickness()=0;
+  virtual G4double getCathodeThickness()=0;
 
-	void saveToFile(G4String outputPath);
+  /* void saveToFile(G4String outputPath); */
 
-	G4double getEfficiency(G4double wavelength);
-
+  G4double getEfficiency(G4double wavelength);
 
 protected:
-	std::vector<G4double> efficiencyPoints;
+  std::vector<G4double> efficiencyPoints;
 };
 
 #endif /* INCLUDE_ABSDETECTOR_HH_ */

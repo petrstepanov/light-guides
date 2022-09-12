@@ -39,34 +39,40 @@ class G4LogicalVolume;
 
 /// Detector construction class to define materials and geometry.
 
-class DetectorConstruction : public G4VUserDetectorConstruction
-{
+class DetectorConstruction: public G4VUserDetectorConstruction {
   public:
     DetectorConstruction();
     ~DetectorConstruction() override;
 
     G4VPhysicalVolume* Construct() override;
 
-    G4LogicalVolume* GetScoringVolume() const { return fScoringVolume; }
+    G4LogicalVolume* GetScoringVolume() const {
+      return fScoringVolume;
+    }
 
   protected:
-    G4LogicalVolume* fScoringVolume = nullptr;
+    G4LogicalVolume *fScoringVolume = nullptr;
+    AbsDetector *detector;
+    G4double greaseThickness;
+    G4double wrapThickness;
+    void addReflectiveSkin(G4LogicalVolume* volume);
+    void addReflectiveBorder(G4VPhysicalVolume* volume1, G4VPhysicalVolume* volume2);
 
-    AbsDetector* detector;
-
-  // Detector Messenger parameters and setters
   public:
+    // User parameters and Detector Messenger setters
     G4double crystalSideA;
     void setCrystalSideA(G4double value);
     G4double crystalSideB;
     void setCrystalSideB(G4double value);
     G4double crystalLength;
     void setCrystalLength(G4double value);
+    G4double lightGuideLength;
+    void setLightGuideLength(G4double value);
     G4String detectorType;
     void setDetectorType(G4String value);
 
-  // Getters
   public:
+    // Getters
     AbsDetector* getDetector();
 };
 

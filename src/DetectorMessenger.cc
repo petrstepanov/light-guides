@@ -13,7 +13,7 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-const G4String DetectorMessenger::detectorTypeCmdDefaultValue = "";
+const G4String DetectorMessenger::detectorTypeCmdDefaultValue = "S13360-6025CS-6x6";
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -38,6 +38,12 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction *d) : fDetector(d) {
   // fCrystalLengthCmd->SetParameterName("choice", true);
   fCrystalLengthCmd->SetDefaultValue(crystalLengthCmdDefaultValue);
   fCrystalLengthCmd->AvailableForStates(G4State_Idle);
+
+  fLightGuideLengthCmd = new G4UIcmdWithADoubleAndUnit("/detector/lightGuideLength", this);
+  fLightGuideLengthCmd->SetGuidance("Define the length of the light guide.");
+  // fLightGuideLengthCmd->SetParameterName("choice", true);
+  fLightGuideLengthCmd->SetDefaultValue(lightGuideLengthCmdDefaultValue);
+  fLightGuideLengthCmd->AvailableForStates(G4State_Idle);
 
   fDetectorTypeCmd = new G4UIcmdWithAString("/detector/detectorType", this);
   fDetectorTypeCmd->SetGuidance("Define model of the sensitive detector.");
@@ -66,6 +72,8 @@ void DetectorMessenger::SetNewValue(G4UIcommand *command, G4String newValue) {
   } else if (command == fCrystalSizeBCmd) {
     fDetector->setCrystalSideB(G4UIcmdWithADoubleAndUnit::GetNewDoubleValue(newValue));
   } else if (command == fCrystalLengthCmd) {
+    fDetector->setCrystalLength(G4UIcmdWithADoubleAndUnit::GetNewDoubleValue(newValue));
+  } else if (command == fLightGuideLengthCmd) {
     fDetector->setCrystalLength(G4UIcmdWithADoubleAndUnit::GetNewDoubleValue(newValue));
   }
 

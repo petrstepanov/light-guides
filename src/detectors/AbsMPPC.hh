@@ -11,12 +11,10 @@
 #include "AbsDetector.hh"
 #include <G4Types.hh>
 
-class AbsMPPC : public AbsDetector {
+class AbsMPPC: public AbsDetector {
 public:
-	AbsMPPC();
-	virtual ~AbsMPPC();
-
-	virtual G4double getSize()=0;
+  AbsMPPC();
+  virtual ~AbsMPPC();
 };
 
 #endif /* SRC_ABSMPPC_HH_ */

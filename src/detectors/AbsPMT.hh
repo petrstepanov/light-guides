@@ -12,17 +12,16 @@
 #include <G4Types.hh>
 #include <G4String.hh>
 
-class AbsPMT : public AbsDetector {
+class AbsPMT: public AbsDetector {
 public:
-	AbsPMT();
-	virtual ~AbsPMT();
+  AbsPMT();
+  virtual ~AbsPMT();
 
-	virtual G4double getDiameter()=0;
-	virtual G4double getCathodeDiameter()=0;
+  virtual G4double getCathodeDiameter()=0;
 
-	G4double getCathodeThickness();
+  G4double getCathodeThickness();
 
-	virtual G4double getWindowThickness();
+  virtual G4double getWindowThickness();
 };
 
 #endif /* SRC_ABSPMT_HH_ */

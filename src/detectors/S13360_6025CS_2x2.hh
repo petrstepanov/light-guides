@@ -10,18 +10,18 @@
 
 #include "AbsMPPC.hh"
 
-class S13360_6025CS_2x2 : public AbsMPPC {
-public:
-	S13360_6025CS_2x2();
-	virtual ~S13360_6025CS_2x2();
+class S13360_6025CS_2x2: public AbsMPPC {
+  public:
+    S13360_6025CS_2x2();
+    virtual ~S13360_6025CS_2x2();
 
-	G4String getName();
-	G4double getSize();
-	G4double getLength();
-	G4double getWindowThickness();
-	G4double getCathodeThickness();
-	G4Material* getWindowMaterial();
-	G4Material* getCathodeMaterial();
+    G4String getName() override;
+    G4double getXYSize() override;
+    G4double getZSize() override;
+    G4double getWindowThickness() override;
+    G4double getCathodeThickness() override;
+    G4Material* getWindowMaterial() override;
+    G4Material* getCathodeMaterial() override;
 };
 
 #endif /* INCLUDE_S13360_6025CS_2x2_HH_ */

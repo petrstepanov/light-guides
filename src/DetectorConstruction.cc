@@ -29,27 +29,40 @@
 
 #include "DetectorConstruction.hh"
 #include "DetectorMessenger.hh"
+#include "Materials.hh"
 #include "detectors/DetectorProvider.hh"
+#include "detectors/AbsMPPC.hh"
 
 #include <G4RunManager.hh>
-#include <G4NistManager.hh>
+//#include <G4NistManager.hh>
 #include <G4Box.hh>
 #include <G4Cons.hh>
 #include <G4Orb.hh>
 #include <G4Sphere.hh>
 #include <G4Trd.hh>
+#include <G4SubtractionSolid.hh>
 #include <G4LogicalVolume.hh>
 #include <G4PVPlacement.hh>
 #include <G4SystemOfUnits.hh>
+#include <G4OpticalSurface.hh>
+#include <G4LogicalSkinSurface.hh>
+#include <G4LogicalBorderSurface.hh>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction() {
-  // Initialize default variable value
+  // Initialize default user parameter values
   crystalSideA = DetectorMessenger::crystalSizeACmdDefaultValue;
   crystalSideB = DetectorMessenger::crystalSizeBCmdDefaultValue;
   crystalLength = DetectorMessenger::crystalLengthCmdDefaultValue;
   detectorType = DetectorMessenger::detectorTypeCmdDefaultValue;
+  lightGuideLength = DetectorMessenger::lightGuideLengthCmdDefaultValue;
+
+  // Initialize default values
+  wrapThickness = 65 * micrometer;
+  greaseThickness = 0.3 * mm;
+
+  // Initialize private objects
   detector = DetectorProvider::getDetector(detectorType);
 }
 
@@ -58,146 +71,272 @@ DetectorConstruction::DetectorConstruction() {
 DetectorConstruction::~DetectorConstruction() {
 }
 
-// Setters for the geometry parameters
+// Setters for geometry parameters
 
-void DetectorConstruction::setCrystalSideA(G4double value){
+void DetectorConstruction::setCrystalSideA(G4double value) {
   crystalSideA = value;
   G4RunManager::GetRunManager()->GeometryHasBeenModified();
 }
 
-void DetectorConstruction::setCrystalSideB(G4double value){
+void DetectorConstruction::setCrystalSideB(G4double value) {
   crystalSideB = value;
   G4RunManager::GetRunManager()->GeometryHasBeenModified();
 }
 
-void DetectorConstruction::setCrystalLength(G4double value){
+void DetectorConstruction::setCrystalLength(G4double value) {
   crystalLength = value;
   G4RunManager::GetRunManager()->GeometryHasBeenModified();
 }
 
-void DetectorConstruction::setDetectorType(G4String value){
+void DetectorConstruction::setLightGuideLength(G4double value) {
+  lightGuideLength = value;
+  G4RunManager::GetRunManager()->GeometryHasBeenModified();
+}
+
+void DetectorConstruction::setDetectorType(G4String value) {
   detectorType = value;
+  detector = DetectorProvider::getDetector(detectorType);
   G4RunManager::GetRunManager()->GeometryHasBeenModified();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 G4VPhysicalVolume* DetectorConstruction::Construct() {
-  // Get nist material manager
-  G4NistManager *nist = G4NistManager::Instance();
-
-  // Envelope parameters
-  G4double env_sizeXY = 20 * cm, env_sizeZ = 30 * cm;
-  G4Material *env_mat = nist->FindOrBuildMaterial("G4_WATER");
-
   // Option to switch on/off checking of volumes overlaps
   G4bool checkOverlaps = true;
 
-  // World
-  G4double world_sizeXY = 1.2 * env_sizeXY;
-  G4double world_sizeZ = 1.2 * env_sizeZ;
-  G4Material *world_mat = nist->FindOrBuildMaterial("G4_AIR");
+  // █░█░█ █▀█ █▀█ █░░ █▀▄
+  // ▀▄▀▄▀ █▄█ █▀▄ █▄▄ █▄▀
+  // https://fsymbols.com/generators/carty/
 
-  G4Box *solidWorld = new G4Box("World",                       //its name
-      0.5 * world_sizeXY, 0.5 * world_sizeXY, 0.5 * world_sizeZ);     //its size
+  G4double assemblyLength = wrapThickness + crystalLength + greaseThickness
+                            + (lightGuideLength > 0 ? lightGuideLength + greaseThickness : 0) + detector->getZSize();
+  G4double maxXY = std::max(crystalSideB, detector->getXYSize());
+  G4double worldSizeXY = maxXY;
+  G4double worldSizeZ = crystalLength + lightGuideLength + detector->getZSize();
+  worldSizeXY *= 2.;
+  worldSizeZ *= 2.;
+  G4Material *worldMaterial = Materials::getInstance()->getMaterial("G4_AIR");
 
-  G4LogicalVolume *logicWorld = new G4LogicalVolume(solidWorld,          //its solid
-      world_mat,           //its material
-      "World");            //its name
+  G4Box *worldSolid = new G4Box("worldSolid" /* name */, 0.5 * worldSizeXY /* size x */, 0.5 * worldSizeXY /* size y */,
+                                0.5 * worldSizeZ /* size z */);
+  G4LogicalVolume *worldLogical = new G4LogicalVolume(worldSolid /* its solid */, worldMaterial /* its material */,
+                                                      "worldLogical" /* its name */);
+  G4VPhysicalVolume *worldPhysical = new G4PVPlacement(0 /* rotation */, G4ThreeVector() /* position */,
+                                                       worldLogical /* logical volume */, "world" /* name */,
+                                                       0 /* parent logical */, false /* boolean operation */,
+                                                       0 /* copy number */, checkOverlaps);
 
-  G4VPhysicalVolume *physWorld = new G4PVPlacement(0,                     //no rotation
-      G4ThreeVector(),       //at (0,0,0)
-      logicWorld,            //its logical volume
-      "World",               //its name
-      0,                     //its mother  volume
-      false,                 //no boolean operation
-      0,                     //copy number
-      checkOverlaps);        //overlaps checking
+  // Calculate position of the front assembly edge along Z axis
+  G4double z0 = -assemblyLength / 2;
 
-  //
-  // Envelope
-  //
-  G4Box *solidEnv = new G4Box("Envelope",                    //its name
-      0.5 * env_sizeXY, 0.5 * env_sizeXY, 0.5 * env_sizeZ); //its size
+  // █▀▀ █▀█ █▄█ █▀ ▀█▀ ▄▀█ █░░
+  // █▄▄ █▀▄ ░█░ ▄█ ░█░ █▀█ █▄▄
 
-  G4LogicalVolume *logicEnv = new G4LogicalVolume(solidEnv,            //its solid
-      env_mat,             //its material
-      "Envelope");         //its name
+  G4Trd *crystalSolid = new G4Trd("crystalSolid", crystalSideA / 2., crystalSideB / 2., crystalSideA / 2.,
+                                  crystalSideB / 2., crystalLength / 2.);
+  G4Material *crystalMaterial = Materials::getInstance()->getMaterial("SciGlass-4-1-L");
+  G4LogicalVolume *crystalLogical = new G4LogicalVolume(crystalSolid, crystalMaterial, "crystalLogical");
 
-  new G4PVPlacement(0,                       //no rotation
-      G4ThreeVector(),         //at (0,0,0)
-      logicEnv,                //its logical volume
-      "Envelope",              //its name
-      logicWorld,              //its mother  volume
-      false,                   //no boolean operation
-      0,                       //copy number
-      checkOverlaps);          //overlaps checking
+  G4ThreeVector crystalPosition = G4ThreeVector(0, 0, z0 + wrapThickness + crystalLength / 2.);
+  G4VPhysicalVolume *crystalPhysical = new G4PVPlacement(0 /* rotation */, crystalPosition /* position */,
+                                                         crystalLogical /* logical volume */, "crystal" /* name */,
+                                                         worldLogical /* parent logical */,
+                                                         false /* boolean operation */, 0 /* copy number */,
+                                                         checkOverlaps);
 
-  //
-  // Shape 1
-  //
-  G4Material *shape1_mat = nist->FindOrBuildMaterial("G4_A-150_TISSUE");
-  G4ThreeVector pos1 = G4ThreeVector(0, 2 * cm, -7 * cm);
+  // █▀▀ █▀█ █▄█ █▀ ▀█▀ ▄▀█ █░░   █░█░█ █▀█ ▄▀█ █▀█
+  // █▄▄ █▀▄ ░█░ ▄█ ░█░ █▀█ █▄▄   ▀▄▀▄▀ █▀▄ █▀█ █▀▀
 
-  // Conical section shape
-  G4double shape1_rmina = 0. * cm, shape1_rmaxa = 2. * cm;
-  G4double shape1_rminb = 0. * cm, shape1_rmaxb = 4. * cm;
-  G4double shape1_hz = 3. * cm;
-  G4double shape1_phimin = 0. * deg, shape1_phimax = 360. * deg;
-  G4Cons *solidShape1 = new G4Cons("Shape1", shape1_rmina, shape1_rmaxa, shape1_rminb, shape1_rmaxb, shape1_hz,
-      shape1_phimin, shape1_phimax);
+  G4Trd *crystalWrapASolid = new G4Trd("crystalWrapASolid", (crystalSideA + 2. * wrapThickness) / 2.,
+                                       (crystalSideB + 2. * wrapThickness) / 2.,
+                                       (crystalSideA + 2. * wrapThickness) / 2.,
+                                       (crystalSideB + 2. * wrapThickness) / 2., (crystalLength + wrapThickness) / 2.);
+  G4Trd *crystalWrapBSolid = new G4Trd("crystalWrapBSolid", crystalSideA / 2., crystalSideB / 2., crystalSideA / 2.,
+                                       crystalSideB / 2., crystalLength / 2.);
+  G4RotationMatrix *noRotation = new G4RotationMatrix();
+  G4ThreeVector wrapTranslation(0, 0, wrapThickness / 2);
+  G4SubtractionSolid *crystalWrapSolid = new G4SubtractionSolid("crystalWrapSolid", crystalWrapASolid,
+                                                                crystalWrapBSolid, noRotation, wrapTranslation);
 
-  G4LogicalVolume *logicShape1 = new G4LogicalVolume(solidShape1,         //its solid
-      shape1_mat,          //its material
-      "Shape1");           //its name
+  G4Material *wrapMaterial = Materials::getInstance()->getMaterial("C10H8O4");
+  G4LogicalVolume *crystalWrapLogical = new G4LogicalVolume(crystalWrapSolid, wrapMaterial, "crystalWrapLogical");
+  G4ThreeVector crystalWrapPosition = G4ThreeVector(0, 0, z0 + (wrapThickness + crystalLength) / 2.);
+  G4VPhysicalVolume *crystalWrapPhysical = new G4PVPlacement(0 /* rotation */, crystalWrapPosition /* position */,
+                                                             crystalWrapLogical /* logical volume */,
+                                                             "crystalWrap" /* name */,
+                                                             worldLogical /* parent logical */,
+                                                             false /* boolean operation */, 0 /* copy number */,
+                                                             checkOverlaps);
+  addReflectiveBorder(crystalPhysical, crystalWrapPhysical);
 
-  new G4PVPlacement(0,                       //no rotation
-      pos1,                    //at position
-      logicShape1,             //its logical volume
-      "Shape1",                //its name
-      logicEnv,                //its mother  volume
-      false,                   //no boolean operation
-      0,                       //copy number
-      checkOverlaps);          //overlaps checking
+  // █░░ █ █▀▀ █░█ ▀█▀   █▀▀ █░█ █ █▀▄ █▀▀
+  // █▄▄ █ █▄█ █▀█ ░█░   █▄█ █▄█ █ █▄▀ ██▄
 
-  //
-  // Shape 2
-  //
-  G4Material *shape2_mat = nist->FindOrBuildMaterial("G4_BONE_COMPACT_ICRU");
-  G4ThreeVector pos2 = G4ThreeVector(0, -1 * cm, 7 * cm);
+  G4double z1 = z0 + wrapThickness + crystalLength;
 
-  // Trapezoid shape
-  G4double shape2_dxa = 12 * cm, shape2_dxb = 12 * cm;
-  G4double shape2_dya = 10 * cm, shape2_dyb = 16 * cm;
-  G4double shape2_dz = 6 * cm;
-  G4Trd *solidShape2 = new G4Trd("Shape2",                      //its name
-      0.5 * shape2_dxa, 0.5 * shape2_dxb, 0.5 * shape2_dya, 0.5 * shape2_dyb, 0.5 * shape2_dz); //its size
+  if (lightGuideLength > 0) {
+    G4Box *greaseGuideSolid = new G4Box("greaseGuideSolid", (crystalSideB + 2 * wrapThickness) / 2.,
+                                        (crystalSideB + 2 * wrapThickness) / 2., greaseThickness / 2.);
+    G4Material *greaseGuideMaterial = Materials::getInstance()->getMaterial("BC630");
+    G4LogicalVolume *greaseGuideLogical = new G4LogicalVolume(greaseGuideSolid, greaseGuideMaterial,
+                                                              "greaseGuideLogical");
 
-  G4LogicalVolume *logicShape2 = new G4LogicalVolume(solidShape2,         //its solid
-      shape2_mat,          //its material
-      "Shape2");           //its name
+    if (greaseThickness > 0) {
+      G4ThreeVector greaseGuidePosition = G4ThreeVector(0, 0, z1 + greaseThickness / 2.);
+      /* G4VPhysicalVolume *greasePhysical = */new G4PVPlacement(0 /* rotation */, greaseGuidePosition /* position */,
+                                                                 greaseGuideLogical /* logical volume */,
+                                                                 "greaseGuide" /* name */,
+                                                                 worldLogical /* parent logical */,
+                                                                 false /* boolean operation */, 0 /* copy number */,
+                                                                 checkOverlaps);
+    }
 
-  new G4PVPlacement(0,                       //no rotation
-      pos2,                    //at position
-      logicShape2,             //its logical volume
-      "Shape2",                //its name
-      logicEnv,                //its mother  volume
-      false,                   //no boolean operation
-      0,                       //copy number
-      checkOverlaps);          //overlaps checking
+    // LIGHT GUIDE
+    G4double detectorXY = detector->getXYSize();
+    G4Trd *lightGuideSolid = new G4Trd("lightGuideSolid", crystalSideB / 2., detectorXY / 2., crystalSideB / 2.,
+                                       detectorXY / 2., lightGuideLength / 2.);
+    G4Material *lightGuideMaterial = Materials::getInstance()->getMaterial("PMMA");
+    G4LogicalVolume *lightGuideLogical = new G4LogicalVolume(lightGuideSolid, lightGuideMaterial, "lightGuideLogical");
 
-  // Set Shape2 as scoring volume
-  //
-  fScoringVolume = logicShape2;
+    G4ThreeVector lightGuidePosition = G4ThreeVector(0, 0, z1 + greaseThickness + lightGuideLength / 2.);
+    G4VPhysicalVolume *lightGuidePhysical = new G4PVPlacement(0 /* rotation */, lightGuidePosition /* position */,
+                                                              lightGuideLogical /* logical volume */,
+                                                              "lightGuide" /* name */,
+                                                              worldLogical /* parent logical */,
+                                                              false /* boolean operation */, 0 /* copy number */,
+                                                              checkOverlaps);
+    // WRAP
+    G4Trd *lightGuideWrapASolid = new G4Trd("lightGuideWrapASolid", (crystalSideB + 2. * wrapThickness) / 2.,
+                                            (detectorXY + 2. * wrapThickness) / 2.,
+                                            (crystalSideB + 2. * wrapThickness) / 2.,
+                                            (detectorXY + 2. * wrapThickness) / 2.,
+                                            lightGuideLength / 2.);
+    G4Trd *lightGuideWrapBSolid = new G4Trd("lightGuideWrapBSolid", crystalSideB / 2., detectorXY / 2.,
+                                            crystalSideB / 2., detectorXY / 2., lightGuideLength / 2.);
 
-  //
-  //always return the physical World
-  //
-  return physWorld;
+    G4SubtractionSolid *lightGuideWrapSolid = new G4SubtractionSolid("lightGuideWrapSolid", lightGuideWrapASolid,
+                                                                     lightGuideWrapBSolid, noRotation,
+                                                                     G4ThreeVector(0, 0, 0));
+
+    G4LogicalVolume *lightGuideWrapLogical = new G4LogicalVolume(lightGuideWrapSolid, wrapMaterial, "lightGuideWrapLogical");
+    G4VPhysicalVolume *lightGuideWrapPhysical = new G4PVPlacement(0 /* rotation */, lightGuidePosition /* position */,
+                                                                  lightGuideWrapLogical /* logical volume */,
+                                                                  "lightGuideWrap" /* name */,
+                                                                  worldLogical /* parent logical */,
+                                                                  false /* boolean operation */, 0 /* copy number */,
+                                                                  checkOverlaps);
+    addReflectiveBorder(lightGuidePhysical, lightGuideWrapPhysical);
+  }
+
+  // █▀▄ █▀▀ ▀█▀ █▀▀ █▀▀ ▀█▀ █▀█ █▀█
+  // █▄▀ ██▄ ░█░ ██▄ █▄▄ ░█░ █▄█ █▀▄
+
+  // coordinate of front edge of the detector
+  G4double zDet = z0 + wrapThickness + crystalLength + (lightGuideLength > 0 ? greaseThickness + lightGuideLength : 0);
+
+  if (AbsMPPC *mppc = dynamic_cast<AbsMPPC*>(detector)) {
+
+    // GREASE
+    if (greaseThickness > 0) {
+      G4double detectorXY = detector->getXYSize();
+      G4Box *greaseSolid = new G4Box("greaseSolid", detectorXY / 2., detectorXY / 2., greaseThickness / 2.);
+      G4Material *greaseMaterial = Materials::getInstance()->getMaterial("BC630");
+      G4LogicalVolume *greaseLogical = new G4LogicalVolume(greaseSolid, greaseMaterial, "greaseLogical");
+      G4ThreeVector greasePosition = G4ThreeVector(0, 0, zDet + greaseThickness / 2.);
+      /* G4VPhysicalVolume *greasePhysical = */new G4PVPlacement(0 /* rotation */, greasePosition /* position */,
+                                                                 greaseLogical /* logical volume */,
+                                                                 "grease" /* name */,
+                                                                 worldLogical /* parent logical */,
+                                                                 false /* boolean operation */, 0 /* copy number */,
+                                                                 checkOverlaps);
+    }
+
+    // MPPC REFLECTOR
+    // Here the reflector thickness is same as grease thickness
+    G4Box *mppcReflectorOuter = new G4Box("mppcReflectorOuterSolid", 0.5 * (maxXY + wrapThickness*2), 0.5 * (maxXY + wrapThickness*2), 0.5 * greaseThickness);
+    G4Box *mppcReflectorInner = new G4Box("mppcReflectorInnerSolid", 0.5 * mppc->getXYSize(), 0.5 * mppc->getXYSize(),
+                                          0.5 * greaseThickness);
+    G4SubtractionSolid *mppcReflectorSolid = new G4SubtractionSolid("mppcReflectorSolid", mppcReflectorOuter,
+                                                                    mppcReflectorInner, noRotation, G4ThreeVector());
+
+    G4LogicalVolume *mppcReflectorLogical = new G4LogicalVolume(mppcReflectorSolid, wrapMaterial, "mppcReflectorLogical");
+    G4ThreeVector mppcReflectorPosition = G4ThreeVector(0, 0, zDet + greaseThickness / 2.);
+    /*G4VPhysicalVolume* mppcReflectorPhysical =*/new G4PVPlacement(0, mppcReflectorPosition, mppcReflectorLogical,
+                                                                    "mppcReflector", worldLogical, false, 0,
+                                                                    checkOverlaps);
+    // Make reflector surface reflective
+    addReflectiveSkin(mppcReflectorLogical);
+
+    // MPPC WINDOW
+    G4Box *mppcWindowSolid = new G4Box("mppcWindowSolid", 0.5 * mppc->getXYSize(), 0.5 * mppc->getXYSize(),
+                                       0.5 * mppc->getWindowThickness());
+    G4LogicalVolume *mppcWindowLogical = new G4LogicalVolume(mppcWindowSolid, mppc->getWindowMaterial(), "mppcWindowLogical");
+    G4ThreeVector mppcWindowPosition = G4ThreeVector(0, 0,
+                                                     zDet + greaseThickness + detector->getWindowThickness() / 2.);
+    /*G4VPhysicalVolume* mppcWindowPhysical =*/new G4PVPlacement(0, mppcWindowPosition, mppcWindowLogical,
+                                                                 "mppcWindow", worldLogical, false, 0,
+                                                                 checkOverlaps);
+
+    // MPPC CATHODE
+    G4Box *mppcCathodeSolid = new G4Box("mppcCathodeSolid", 0.5 * mppc->getXYSize(), 0.5 * mppc->getXYSize(),
+                                        0.5 * mppc->getCathodeThickness());
+    G4LogicalVolume *mppcCathodeLogical = new G4LogicalVolume(mppcCathodeSolid, mppc->getCathodeMaterial(),
+                                                              "mppcCathodeLogical");
+    G4ThreeVector mppcCathodePosition = G4ThreeVector(
+        0, 0, zDet + greaseThickness + detector->getWindowThickness() + mppc->getCathodeThickness() / 2.);
+    /*G4VPhysicalVolume* mppcCathodePhysical =*/new G4PVPlacement(0, mppcCathodePosition, mppcCathodeLogical,
+                                                                  "mppcCathode", worldLogical, false, 0,
+                                                                  checkOverlaps);
+
+    // MPPC SHIELD
+    G4double shieldLength = mppc->getWindowThickness() + mppc->getCathodeThickness();
+    G4Box *mppcShieldASolid = new G4Box("mppcShieldASolid", 0.5 * (maxXY + wrapThickness*2), 0.5 * (maxXY + wrapThickness*2), 0.5 * shieldLength);
+    G4Box *mppcShieldBSolid = new G4Box("mppcShieldBSolid", 0.5 * mppc->getXYSize(), 0.5 * mppc->getXYSize(),
+                                        0.5 * shieldLength);
+    G4SubtractionSolid *mppcShieldSolid = new G4SubtractionSolid("mppcShieldSolid", mppcShieldASolid, mppcShieldBSolid,
+                                                                 noRotation, G4ThreeVector());
+    G4Material *mppcShieldMaterial = Materials::getInstance()->getMaterial("MuMetal");
+    G4LogicalVolume *mppcShieldLogical = new G4LogicalVolume(mppcShieldSolid, mppcShieldMaterial, "mppcShieldLogical");
+    G4ThreeVector mppcShieldPosition = G4ThreeVector(0, 0, zDet + greaseThickness + shieldLength / 2.);
+    /*G4VPhysicalVolume* mppcShieldPhysical =*/new G4PVPlacement(0, mppcShieldPosition, mppcShieldLogical,
+                                                                 "mppcShield", worldLogical, false, 0,
+                                                                 checkOverlaps);
+
+  }
+  // always return the physical World
+  return worldPhysical;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-AbsDetector* DetectorConstruction::getDetector(){
+AbsDetector* DetectorConstruction::getDetector() {
   return detector;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::addReflectiveSkin(G4LogicalVolume *volumeLogical) {
+  G4String surfaceName = volumeLogical->GetName() + "Surface";
+  G4OpticalSurface *surface = new G4OpticalSurface(surfaceName);
+  surface->SetType(dielectric_LUT);
+  surface->SetModel(LUT);
+  surface->SetFinish(polishedvm2000air);
+
+  G4String skinSurfaceName = volumeLogical->GetName() + "SkinSurface";
+  /*G4LogicalSkinSurface* skinSurface = */new G4LogicalSkinSurface(skinSurfaceName, volumeLogical, surface);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void DetectorConstruction::addReflectiveBorder(G4VPhysicalVolume *volumePhysical1, G4VPhysicalVolume *volumePhysical2) {
+  G4String surfaceName = volumePhysical1->GetName() + volumePhysical2->GetName() + "Surface";
+  G4OpticalSurface *surface = new G4OpticalSurface(surfaceName);
+  surface->SetType(dielectric_LUT);
+  surface->SetModel(LUT);
+  surface->SetFinish(polishedvm2000air);
+
+  G4String borderSurfaceName = volumePhysical1->GetName() + volumePhysical2->GetName() + "BorderSurface";
+  /*G4LogicalBorderSurface* borderSurface = */new G4LogicalBorderSurface(borderSurfaceName, volumePhysical1,
+                                                                         volumePhysical2, surface);
 }

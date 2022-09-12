@@ -31,7 +31,9 @@
 #include <G4RunManagerFactory.hh>
 #include <G4SteppingVerbose.hh>
 #include <G4UImanager.hh>
-#include <QBBC.hh>
+// #include <QBBC.hh>
+#include <FTFP_BERT.hh>
+#include <G4OpticalPhysics.hh>
 
 #include <G4VisExecutive.hh>
 #include <G4UIExecutive.hh>
@@ -64,8 +66,14 @@ int main(int argc,char** argv)
   runManager->SetUserInitialization(dc);
 
   // Physics list
-  G4VModularPhysicsList* physicsList = new QBBC;
-  physicsList->SetVerboseLevel(1);
+  // G4VModularPhysicsList* physicsList = new QBBC;
+  // physicsList->SetVerboseLevel(1);
+
+  G4VModularPhysicsList* physicsList = new FTFP_BERT;
+  // physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
+  G4OpticalPhysics* opticalPhysics = new G4OpticalPhysics();
+
+  physicsList->RegisterPhysics(opticalPhysics);
   runManager->SetUserInitialization(physicsList);
 
   // User action initialization
@@ -95,6 +103,7 @@ int main(int argc,char** argv)
   else {
     // interactive mode
     UImanager->ApplyCommand("/control/execute init_vis.mac");
+    UImanager->ApplyCommand("/vis/scene/add/text2D 0.9 -0.9 12 ! ! SciGlass4-1-L");
     ui->SessionStart();
     delete ui;
   }

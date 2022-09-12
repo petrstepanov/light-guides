@@ -12,11 +12,11 @@
 #include <G4String.hh>
 
 class DetectorProvider {
-public:
-  DetectorProvider();
-  virtual ~DetectorProvider();
+  public:
+    DetectorProvider();
+    virtual ~DetectorProvider();
 
-  static AbsDetector* getDetector(G4String);
+    static AbsDetector* getDetector(G4String);
 };
 
 #endif /* SRC_DETECTORS_DETECTORPROVIDER_HH_ */

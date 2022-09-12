@@ -37,6 +37,7 @@ private:
   G4UIcmdWithADoubleAndUnit*   fCrystalSizeACmd;
   G4UIcmdWithADoubleAndUnit*   fCrystalSizeBCmd;
   G4UIcmdWithADoubleAndUnit*   fCrystalLengthCmd;
+  G4UIcmdWithADoubleAndUnit*   fLightGuideLengthCmd;
   G4UIcmdWithAString*          fDetectorTypeCmd;
 
 public:
@@ -44,6 +45,7 @@ public:
   static constexpr G4double crystalSizeACmdDefaultValue = 4*cm;
   static constexpr G4double crystalSizeBCmdDefaultValue = 6*cm;
   static constexpr G4double crystalLengthCmdDefaultValue = 40*cm;
+  static constexpr G4double lightGuideLengthCmdDefaultValue = 8*cm;
   static const G4String detectorTypeCmdDefaultValue;
 };
 #endif /* SRC_DETECTORMESSENGER_H_ */

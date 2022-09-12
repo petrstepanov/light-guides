@@ -38,10 +38,9 @@ add_executable(lightguides ${PROJECT_SOURCE_DIR}/src/lightguides.cc ${sources} $
 target_link_libraries(lightguides ${Geant4_LIBRARIES})
 
 #----------------------------------------------------------------------------
-# Copy all scripts to the build directory, i.e. the directory in which we
-# build B1. This is so that we can run the executable directly because it
-# relies on these scripts being in the current working directory.
+# Copy all macros to the build directory
 #
+file(GLOB_RECURSE macros CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/macros/*.mac)
 file(COPY macros DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 #----------------------------------------------------------------------------
