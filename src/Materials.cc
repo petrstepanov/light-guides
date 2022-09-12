@@ -1617,6 +1617,7 @@ Materials::Materials() : fMaterialsList { }
   // █▀█ █▀▄▀█ █▀▄▀█ ▄▀█
   // █▀▀ █░▀░█ █░▀░█ █▀█
   // https://eljentechnology.com/products/light-guides-and-acrylic-plastic
+  // https://eljentechnology.com/images/products/data_sheets/Light_Guides_and_Acrylic_Plastic.pdf
   // https://omnexus.specialchem.com/selection-guide/polymethyl-methacrylate-pmma-acrylic-plastic
   {
     G4Material *material = new G4Material("PMMA", 1.18 * g / cm3, 3, kStateSolid);

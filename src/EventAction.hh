@@ -47,11 +47,11 @@ class EventAction : public G4UserEventAction
     void BeginOfEventAction(const G4Event* event) override;
     void EndOfEventAction(const G4Event* event) override;
 
-    void AddEdep(G4double edep) { fEdep += edep; }
+    void AddNPE(G4double nPE) { nPEPerEvent += nPE; }
 
   private:
     RunAction* fRunAction = nullptr;
-    G4double   fEdep = 0.;
+    G4double   nPEPerEvent = 0.;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

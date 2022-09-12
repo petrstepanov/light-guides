@@ -31,8 +31,9 @@
 #include <G4RunManagerFactory.hh>
 #include <G4SteppingVerbose.hh>
 #include <G4UImanager.hh>
-// #include <QBBC.hh>
+//#include <QBBC.hh>
 #include <FTFP_BERT.hh>
+#include <G4EmStandardPhysics_option4.hh>
 #include <G4OpticalPhysics.hh>
 
 #include <G4VisExecutive.hh>
@@ -57,28 +58,26 @@ int main(int argc,char** argv)
 
   // Construct the default run manager
   //
-  G4RunManager* runManager = G4RunManagerFactory::CreateRunManager(G4RunManagerType::Default);
+  G4RunManager* runManager = G4RunManagerFactory::CreateRunManager();
 
   // Set mandatory initialization classes
   //
   // Detector construction
-  DetectorConstruction* dc = new DetectorConstruction();
-  runManager->SetUserInitialization(dc);
+  runManager->SetUserInitialization(new DetectorConstruction());
 
   // Physics list
   // G4VModularPhysicsList* physicsList = new QBBC;
   // physicsList->SetVerboseLevel(1);
 
   G4VModularPhysicsList* physicsList = new FTFP_BERT;
-  // physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
+  physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
   G4OpticalPhysics* opticalPhysics = new G4OpticalPhysics();
 
   physicsList->RegisterPhysics(opticalPhysics);
   runManager->SetUserInitialization(physicsList);
 
   // User action initialization
-  ActionInitialization* ai = new ActionInitialization();
-  runManager->SetUserInitialization(ai);
+  runManager->SetUserInitialization(new ActionInitialization());
 
   // Initialize visualization
   //
@@ -95,15 +94,15 @@ int main(int argc,char** argv)
 
   // Process macro or start UI session
   if ( argc > 1 ) {
-    // batch mode
+    // Batch mode
     G4String command = "/control/execute ";
     G4String fileName = argv[1];
     UImanager->ApplyCommand(command+fileName);
   }
   else {
-    // interactive mode
-    UImanager->ApplyCommand("/control/execute init_vis.mac");
-    UImanager->ApplyCommand("/vis/scene/add/text2D 0.9 -0.9 12 ! ! SciGlass4-1-L");
+    // Interactive mode
+    UImanager->ApplyCommand("/control/execute init-vis.mac");
+    // UImanager->ApplyCommand("/vis/scene/add/text2D 0.9 -0.9 12 ! ! SciGlass4-1-L");
     ui->SessionStart();
     delete ui;
   }

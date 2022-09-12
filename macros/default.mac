@@ -1,19 +1,9 @@
-# Macro file for example B1 test
-
-/run/numberOfThreads 1
+# /run/numberOfThreads 1
 /run/initialize
 
-/control/execute ./gps-op-emission-SciGlass-4-1-L.mac
+/control/execute gps-op-emission-SciGlass-4-1-L.mac
 /gps/pos/centre 0 0 0 mm
 
-# /gun/particle e-
-# /gun/energy 6 MeV
-
 #/run/printProgress 10
-/run/beamOn 1
+/run/beamOn 10
 
-# proton 210 MeV 
-#/gun/particle proton
-#/gun/energy 210 MeV
-
-#/run/beamOn 1000

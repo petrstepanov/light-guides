@@ -1,5 +1,4 @@
-# Macro file for the initialization of example B1
-# in interactive session
+# Interactive session
 #
 # Set some default verbose
 /control/verbose 2
@@ -7,7 +6,7 @@
 /run/verbose 2
 #
 # Change the default number of threads (in multi-threaded mode)
-#/run/numberOfThreads 4
+/run/numberOfThreads 1
 #
 # Initialize kernel
 /run/initialize

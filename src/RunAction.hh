@@ -36,12 +36,6 @@
 
 class G4Run;
 
-/// Run action class
-///
-/// In EndOfRunAction(), it calculates the dose in the selected volume
-/// from the energy deposit accumulated via stepping and event actions.
-/// The computed dose is then printed on the screen.
-
 class RunAction : public G4UserRunAction
 {
   public:
@@ -49,13 +43,12 @@ class RunAction : public G4UserRunAction
     ~RunAction() override;
 
     void BeginOfRunAction(const G4Run*) override;
-    void   EndOfRunAction(const G4Run*) override;
+    void EndOfRunAction(const G4Run*) override;
 
-    void AddEdep (G4double edep);
+    void AddNPE (G4int npe);
 
   private:
-    G4Accumulable<G4double> fEdep = 0.;
-    G4Accumulable<G4double> fEdep2 = 0.;
+    G4Accumulable<G4int> nPE = 0.;
 };
 
 #endif

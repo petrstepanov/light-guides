@@ -83,6 +83,7 @@ Utils* Utils::getInstance() {
   return instance;
 }
 
+
 G4double Utils::getGPSMonoEnergy() {
   PrimaryGeneratorAction *primaryGeneratorAction =
       (PrimaryGeneratorAction*) G4RunManager::GetRunManager()->GetUserPrimaryGeneratorAction();
@@ -91,8 +92,9 @@ G4double Utils::getGPSMonoEnergy() {
 
   // PS: we're setting energy via "/gps/ene/mono". Therefore energy is saved
   // in G4SingleParticleSource (check in G4GeneralParticcleSourcceMessenger) which is a member ofG4GeneralParticleSource
-  const G4ParticleGun *particleGun = primaryGeneratorAction->GetParticleGun();
-  return particleGun->GetParticleEnergy();
+  const G4GeneralParticleSource *particleGun = primaryGeneratorAction->GetParticleGun();
+  G4SingleParticleSource *particleSource = particleGun->GetCurrentSource();
+  return particleSource->GetEneDist()->GetMonoEnergy();
 }
 
 /*

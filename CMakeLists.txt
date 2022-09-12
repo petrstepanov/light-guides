@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------------
 # Setup the project
-cmake_minimum_required(VERSION 3.16...3.21)
-project(B1)
+cmake_minimum_required(VERSION 3.16)
+project(lightguides)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
@@ -34,14 +34,24 @@ file(GLOB_RECURSE headers CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.hh)
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
-add_executable(lightguides ${PROJECT_SOURCE_DIR}/src/lightguides.cc ${sources} ${headers})
-target_link_libraries(lightguides ${Geant4_LIBRARIES})
+add_executable(${CMAKE_PROJECT_NAME} ${PROJECT_SOURCE_DIR}/src/lightguides.cc ${sources} ${headers})
+target_link_libraries(${CMAKE_PROJECT_NAME} ${Geant4_LIBRARIES})
 
 #----------------------------------------------------------------------------
 # Copy all macros to the build directory
 #
-file(GLOB_RECURSE macros CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/macros/*.mac)
-file(COPY macros DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+file(GLOB_RECURSE Geant4MacroFiles CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/macros/*.mac)
+# file(COPY macros DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+add_custom_target(copyMacros)
+
+foreach(Geant4MacroFile ${Geant4MacroFiles})
+  add_custom_command(TARGET copyMacros PRE_BUILD
+                     COMMAND ${CMAKE_COMMAND} -E
+                         copy ${Geant4MacroFile} ${CMAKE_CURRENT_BINARY_DIR})
+endforeach()
+
+add_dependencies(${CMAKE_PROJECT_NAME} copyMacros)
 
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
