@@ -10,7 +10,7 @@
 
 #-----------------------------------------------
 # User parameters
-/detector/lightGuideLength 1 cm
+/detector/lightGuideLength 8 cm
 #-----------------------------------------------
 
 # Initialize kernel

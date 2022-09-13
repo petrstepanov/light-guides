@@ -234,8 +234,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
                                             (crystalSideB + 2. * wrapThickness) / 2.,
                                             (detectorXY + 2. * wrapThickness) / 2., lightGuideLength / 2.);
     // Tip: added 1 nanometer because "Stuck Track: potential geometry or navigation problem." between "lightGuideWrap" and "grease"
-    G4Trd *lightGuideWrapBSolid = new G4Trd("lightGuideWrapBSolid", crystalSideB / 2., detectorXY / 2. + 1 * nanometer,
-                                            crystalSideB / 2., detectorXY / 2. + 1 * nanometer, lightGuideLength / 2.);
+    G4Trd *lightGuideWrapBSolid = new G4Trd("lightGuideWrapBSolid", crystalSideB / 2., detectorXY / 2. /*+ 1 * nanometer*/,
+                                            crystalSideB / 2., detectorXY / 2. /*+ 1 * nanometer*/, lightGuideLength / 2.);
 
     G4SubtractionSolid *lightGuideWrapSolid = new G4SubtractionSolid("lightGuideWrapSolid", lightGuideWrapASolid,
                                                                      lightGuideWrapBSolid, noRotation,
