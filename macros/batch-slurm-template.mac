@@ -7,7 +7,8 @@
 /run/initialize
 
 /control/execute gps-default.mac
-/gps/pos/centre 0. 0. -30 cm
+/gps/pos/centre 0. 0. -35 cm
 /gps/ene/mono _ENERGY GeV
 
+#/run/printProgress 10
 /run/beamOn _EVENTS
