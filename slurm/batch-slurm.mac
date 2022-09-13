@@ -9,7 +9,7 @@
 #SBATCH --array=0-7
 
 # Number of events
-EVENTS=10
+EVENTS=500
 
 # Incident particle energy (GeV)
 ENERGY=4

@@ -129,13 +129,13 @@ void RunAction::EndOfRunAction(const G4Run *run) {
   // Print
   //
   if (IsMaster()) {
-    G4cout << G4endl << "--------------------End of Global Run-----------------------";
+    G4cout << G4endl << "------------------- End of Global Run ----------------------";
   } else {
-    G4cout << G4endl << "--------------------End of Local Run------------------------";
+    G4cout << G4endl << "------------------- End of Local Run -----------------------";
   }
 
   G4cout << G4endl << " The run consists of " << nofEvents << " " << runCondition << G4endl
-         << " Cumulated number of photo-electrons, in scoring volume : " << nPETotal << " PE" << G4endl
+         << " Cumulated number of photo-electrons in scoring volume: " << nPETotal << " PE" << G4endl
          << "------------------------------------------------------------" << G4endl << G4endl;
 
   auto analysisManager = G4AnalysisManager::Instance();

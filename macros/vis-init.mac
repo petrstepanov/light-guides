@@ -8,7 +8,10 @@
 # Change the default number of threads (in multi-threaded mode)
 # /run/numberOfThreads 1
 
+#-----------------------------------------------
+# User parameters
 /detector/lightGuideLength 1 cm
+#-----------------------------------------------
 
 # Initialize kernel
 /run/initialize
@@ -114,7 +117,7 @@
 #
 # To get nice view
 # Make the "world" logical volume invisible
-/vis/geometry/set/visibility worldLogical 0 false
+/vis/geometry/set/visibility World 0 false
 # Make "crystal" transparent cyan to represent scintillator
 
 /vis/geometry/set/colour crystalLogical        0 0 1 1 0.2
@@ -137,7 +140,7 @@
 /vis/viewer/set/style surface
 # /vis/viewer/set/hiddenMarker true
 
-/vis/viewer/set/viewpointThetaPhi 120 150
+/vis/viewer/set/viewpointThetaPhi 60 150
 #/vis/viewer/set/viewpointThetaPhi 90 180
 
 #/vis/viewer/addCutawayPlane 0 0 0 cm 1 0 0
