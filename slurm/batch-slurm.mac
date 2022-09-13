@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#SBATCH --partition=priority
+#SBATCH --account=eic
+#SBATCH --mem-per-cpu=512
+#SBATCH --time=12:00:00
+#SBATCH --output=npe_%A_%a.out
+#SBATCH --error=npe_%A_%a.err
+#SBATCH --array=0-7
+
+# Number of events
+EVENTS=10
+
+# Incident particle energy (GeV)
+ENERGY=4
+
+# Define waveguide length energy array (slurm does not support float values)
+# We can use slurm array as index for our array with float incident energies
+LENGTHS=(0      5      10     20     30     50     75     100)
+# Index  0      1      2      3      4      5      6      7
+
+# Template and output Geant4 macro names
+TEMPLATE_MACROS=./macros/batch-slurm-template.mac
+MACROS=./macros/batch-${LENGTHS[$SLURM_ARRAY_TASK_ID]}mm.mac
+
+# Source the environment
+source /site/12gev_phys/softenv.sh 2.6
+
+# Navigate into the build directory
+# Program should be compiled with same environment first: ./installGuides.sh
+cd /u/home/petrs/Development/light-guides-build/
+
+# Create new Geant4 macros from template
+cp ${TEMPLATE_MACROS} ${MACROS}
+
+sed -i "s;_ENERGY;${ENERGY};g" ${MACROS}
+sed -i "s;_EVENTS;${EVENTS};g" ${MACROS}
+
+# Substitute _LENGTH string with length array element with Slurm array index
+sed -i "s;_LENGTH;${LENGTHS[$SLURM_ARRAY_TASK_ID]};g" ${MACROS}
+
+# Pass macros to executable
+./lightguides ${MACROS} 

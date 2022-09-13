@@ -1,12 +1,12 @@
 /vis/ASCIITree/verbose 13
 /vis/drawTree
 
-/detector/lightGuideLength 30 mm
+/detector/lightGuideLength _LENGTH mm
 
 /run/initialize
 
 /control/execute gps-default.mac
 /gps/pos/centre 0. 0. -30 cm
+/gps/ene/mono _ENERGY GeV
 
-#/run/printProgress 10
-/run/beamOn 100
+/run/beamOn _EVENTS
