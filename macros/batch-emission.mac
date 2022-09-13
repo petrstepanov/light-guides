@@ -1,0 +1,10 @@
+/vis/ASCIITree/verbose 13
+/vis/drawTree
+
+/detector/lightGuideLength 5 mm
+
+/run/initialize
+
+/control/execute gps-op-emission-SciGlass-4-1-L.mac
+
+/run/beamOn 1000000
