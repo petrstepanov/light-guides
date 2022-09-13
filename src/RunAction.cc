@@ -63,6 +63,7 @@ RunAction::RunAction() {
 
   // Create analysis manager
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  analysisManager->SetNtupleMerging(true);
   analysisManager->SetVerboseLevel(1);
 }
 
