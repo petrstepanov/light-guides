@@ -46,7 +46,15 @@ add_custom_target(copy_macros
 add_dependencies(${CMAKE_PROJECT_NAME} copy_macros)
 
 #----------------------------------------------------------------------------
-# Create output directory (at build time, not build system generation)
+# Copy all SLURM scripts to the build directory (at build time, not build system generation)
+#
+add_custom_target(copy_macros
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/slurm ${CMAKE_CURRENT_BINARY_DIR}/slurm
+)
+add_dependencies(${CMAKE_PROJECT_NAME} copy_macros)
+
+#----------------------------------------------------------------------------
+# Create output directory (at build time, not build system generation) since Geant4 cannot create directories
 #
 add_custom_target(output_dir
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/output
