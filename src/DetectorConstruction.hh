@@ -31,6 +31,7 @@
 #define B1DetectorConstruction_h 1
 
 #include "G4VUserDetectorConstruction.hh"
+#include "DetectorMessenger.hh"
 #include "detectors/AbsDetector.hh"
 #include "globals.hh"
 
@@ -58,6 +59,9 @@ class DetectorConstruction: public G4VUserDetectorConstruction {
     void addReflectiveSkin(G4LogicalVolume* volume);
     void addReflectiveBorder(G4VPhysicalVolume* volume1, G4VPhysicalVolume* volume2);
 
+    // Define the messenger of the detector component
+    DetectorMessenger* fDetectorMessenger = nullptr;
+
   public:
     // User parameters and Detector Messenger setters
     G4double crystalSideA;
@@ -74,6 +78,7 @@ class DetectorConstruction: public G4VUserDetectorConstruction {
   public:
     // Getters
     AbsDetector* getDetector();
+    G4double getLightGuideLength();
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

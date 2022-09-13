@@ -53,7 +53,7 @@ class PrimaryGeneratorAction: public G4VUserPrimaryGeneratorAction {
     void GeneratePrimaries(G4Event*) override;
 
     // method to access particle gun
-    const G4GeneralParticleSource* GetParticleGun() const {
+    G4GeneralParticleSource* GetParticleGun() const {
       return fParticleGun;
     }
 

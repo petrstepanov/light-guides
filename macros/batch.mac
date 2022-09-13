@@ -1,0 +1,11 @@
+/vis/ASCIITree/verbose 13
+/vis/drawTree
+
+/detector/lightGuideLength 3 cm
+
+/run/initialize
+
+/control/execute gps-default.mac
+
+#/run/printProgress 10
+/run/beamOn 100

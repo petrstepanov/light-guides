@@ -29,14 +29,15 @@
 
 #include "EventAction.hh"
 #include "RunAction.hh"
+#include "Utils.hh"
 
 // #include <GEvent.hh>
 #include <G4RunManager.hh>
+#include <G4AnalysisManager.hh>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-EventAction::EventAction(RunAction *runAction) :
-    fRunAction(runAction) {
+EventAction::EventAction(RunAction *runAction) : fRunAction(runAction) {
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -52,9 +53,17 @@ void EventAction::BeginOfEventAction(const G4Event*) {
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void EventAction::EndOfEventAction(const G4Event*) {
-  // accumulate statistics in run action
+void EventAction::EndOfEventAction(const G4Event* event) {
+  // accumulate statistics in run action (not using now)
   fRunAction->AddNPE(nPEPerEvent);
+
+  // Populate
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+
+  analysisManager->FillNtupleIColumn(0, (G4int)nPEPerEvent);
+  analysisManager->FillNtupleIColumn(1, event->GetEventID());
+  analysisManager->FillNtupleIColumn(1, Utils::getLightGuideLength());
+  analysisManager->AddNtupleRow();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

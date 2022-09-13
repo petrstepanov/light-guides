@@ -1,0 +1,10 @@
+# /run/numberOfThreads 1
+/run/initialize
+
+# /control/execute gps-op-emission-SciGlass-4-1-L.mac
+
+/control/execute gps-default.mac
+/gps/ene/mono 10 MeV
+
+#/run/printProgress 10
+/run/beamOn 10

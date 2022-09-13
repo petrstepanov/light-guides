@@ -52,7 +52,8 @@ public:
   static Utils* getInstance();
 
   static G4double getGPSMonoEnergy();
-//  static G4String getGPSParticleName();
+  static G4String getGPSParticleName();
+  static G4double getLightGuideLength();
 //  static G4double getGPSZPos();
   static G4int getNumberOfEvents();
 //  static G4String getCrystalMaterial();

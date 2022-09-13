@@ -30,6 +30,7 @@
 #include "RunAction.hh"
 #include "PrimaryGeneratorAction.hh"
 #include "DetectorConstruction.hh"
+#include "Utils.hh"
 // #include "Run.hh"
 
 #include <G4RunManager.hh>
@@ -39,6 +40,7 @@
 #include <G4LogicalVolume.hh>
 #include <G4UnitsTable.hh>
 #include <G4SystemOfUnits.hh>
+#include <G4AnalysisManager.hh>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -58,6 +60,10 @@ RunAction::RunAction() {
   // Register accumulable to the accumulable manager
   G4AccumulableManager *accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->RegisterAccumulable(nPE);
+
+  // Create analysis manager
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  analysisManager->SetVerboseLevel(1);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -74,6 +80,22 @@ void RunAction::BeginOfRunAction(const G4Run*) {
   // reset accumulables to their initial values
   G4AccumulableManager *accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->Reset();
+
+  // Get analysis manager
+  auto analysisManager = G4AnalysisManager::Instance();
+
+  // Open an output file
+//  analysisManager->SetNtupleDirectoryName("output");
+  G4String fileName = "output/";
+  fileName += Utils::getOutputFileName();
+  analysisManager->OpenFile(fileName);
+
+  // Create ntuple
+  analysisManager->CreateNtuple("lightguides", "Values per Geant4 event");
+  analysisManager->CreateNtupleIColumn("nPE");
+  analysisManager->CreateNtupleIColumn("eventNumber");
+  analysisManager->CreateNtupleIColumn("guideLength");
+  analysisManager->FinishNtuple();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -114,6 +136,10 @@ void RunAction::EndOfRunAction(const G4Run *run) {
   G4cout << G4endl << " The run consists of " << nofEvents << " " << runCondition << G4endl
          << " Cumulated number of photo-electrons, in scoring volume : " << nPETotal << " PE" << G4endl
          << "------------------------------------------------------------" << G4endl << G4endl;
+
+  auto analysisManager = G4AnalysisManager::Instance();
+  analysisManager->Write();
+  analysisManager->CloseFile();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

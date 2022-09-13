@@ -25,31 +25,31 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction *d) : fDetector(d) {
   fCrystalSizeACmd->SetGuidance("Define the width/height of the beginning of the crystal.");
   // fCrystalSizeACmd->SetParameterName("choice", true);
   fCrystalSizeACmd->SetDefaultValue(crystalSizeACmdDefaultValue);
-  fCrystalSizeACmd->AvailableForStates(G4State_Idle);
+  fCrystalSizeACmd->AvailableForStates(G4State_PreInit);
 
   fCrystalSizeBCmd = new G4UIcmdWithADoubleAndUnit("/detector/crystalSizeB", this);
   fCrystalSizeBCmd->SetGuidance("Define the width/height of the end of the crystal.");
   // fCrystalSizeBCmd->SetParameterName("choice", true);
   fCrystalSizeBCmd->SetDefaultValue(crystalSizeBCmdDefaultValue);
-  fCrystalSizeBCmd->AvailableForStates(G4State_Idle);
+  fCrystalSizeBCmd->AvailableForStates(G4State_PreInit);
 
   fCrystalLengthCmd = new G4UIcmdWithADoubleAndUnit("/detector/crystalLength", this);
   fCrystalLengthCmd->SetGuidance("Define the length of the crystal.");
   // fCrystalLengthCmd->SetParameterName("choice", true);
   fCrystalLengthCmd->SetDefaultValue(crystalLengthCmdDefaultValue);
-  fCrystalLengthCmd->AvailableForStates(G4State_Idle);
+  fCrystalLengthCmd->AvailableForStates(G4State_PreInit);
 
   fLightGuideLengthCmd = new G4UIcmdWithADoubleAndUnit("/detector/lightGuideLength", this);
   fLightGuideLengthCmd->SetGuidance("Define the length of the light guide.");
   // fLightGuideLengthCmd->SetParameterName("choice", true);
   fLightGuideLengthCmd->SetDefaultValue(lightGuideLengthCmdDefaultValue);
-  fLightGuideLengthCmd->AvailableForStates(G4State_Idle);
+  fLightGuideLengthCmd->AvailableForStates(G4State_PreInit);
 
   fDetectorTypeCmd = new G4UIcmdWithAString("/detector/detectorType", this);
   fDetectorTypeCmd->SetGuidance("Define model of the sensitive detector.");
   // fDetectorTypeCmd->SetParameterName("choice", true);
   fDetectorTypeCmd->SetDefaultValue("");
-  fDetectorTypeCmd->AvailableForStates(G4State_Idle);
+  fDetectorTypeCmd->AvailableForStates(G4State_PreInit);
 
 //  G4UIcmdWithADouble*          fCrystalSizeBCmd;
 //  G4UIcmdWithADouble*          fCrystalLengthBCmd;
@@ -74,7 +74,7 @@ void DetectorMessenger::SetNewValue(G4UIcommand *command, G4String newValue) {
   } else if (command == fCrystalLengthCmd) {
     fDetector->setCrystalLength(G4UIcmdWithADoubleAndUnit::GetNewDoubleValue(newValue));
   } else if (command == fLightGuideLengthCmd) {
-    fDetector->setCrystalLength(G4UIcmdWithADoubleAndUnit::GetNewDoubleValue(newValue));
+    fDetector->setLightGuideLength(G4UIcmdWithADoubleAndUnit::GetNewDoubleValue(newValue));
   }
 
 }

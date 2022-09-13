@@ -31,7 +31,6 @@
 #include <G4RunManagerFactory.hh>
 #include <G4SteppingVerbose.hh>
 #include <G4UImanager.hh>
-//#include <QBBC.hh>
 #include <FTFP_BERT.hh>
 #include <G4EmStandardPhysics_option4.hh>
 #include <G4OpticalPhysics.hh>
@@ -57,8 +56,9 @@ int main(int argc,char** argv)
   G4SteppingVerbose::UseBestUnit(precision);
 
   // Construct the default run manager
-  //
-  G4RunManager* runManager = G4RunManagerFactory::CreateRunManager();
+  // https://geant4-userdoc.web.cern.ch/UsersGuides/ForApplicationDeveloper/html/GettingStarted/mainProgram.html?highlight=runmanagerfactory#g4runmanager
+  // auto runManager = G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial);
+  auto runManager = G4RunManagerFactory::CreateRunManager();
 
   // Set mandatory initialization classes
   //
@@ -101,7 +101,7 @@ int main(int argc,char** argv)
   }
   else {
     // Interactive mode
-    UImanager->ApplyCommand("/control/execute init-vis.mac");
+    UImanager->ApplyCommand("/control/execute vis-init.mac");
     // UImanager->ApplyCommand("/vis/scene/add/text2D 0.9 -0.9 12 ! ! SciGlass4-1-L");
     ui->SessionStart();
     delete ui;

@@ -38,20 +38,20 @@ add_executable(${CMAKE_PROJECT_NAME} ${PROJECT_SOURCE_DIR}/src/lightguides.cc ${
 target_link_libraries(${CMAKE_PROJECT_NAME} ${Geant4_LIBRARIES})
 
 #----------------------------------------------------------------------------
-# Copy all macros to the build directory
+# Copy all macros to the build directory (at build time, not build system generation)
 #
+add_custom_target(copy_macros
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/macros ${CMAKE_CURRENT_BINARY_DIR}/macros
+)
+add_dependencies(${CMAKE_PROJECT_NAME} copy_macros)
 
-file(GLOB_RECURSE Geant4MacroFiles CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/macros/*.mac)
-# file(COPY macros DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-add_custom_target(copyMacros)
-
-foreach(Geant4MacroFile ${Geant4MacroFiles})
-  add_custom_command(TARGET copyMacros PRE_BUILD
-                     COMMAND ${CMAKE_COMMAND} -E
-                         copy ${Geant4MacroFile} ${CMAKE_CURRENT_BINARY_DIR})
-endforeach()
-
-add_dependencies(${CMAKE_PROJECT_NAME} copyMacros)
+#----------------------------------------------------------------------------
+# Create output directory (at build time, not build system generation)
+#
+add_custom_target(output_dir
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/output
+)
+add_dependencies(${CMAKE_PROJECT_NAME} output_dir)
 
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX

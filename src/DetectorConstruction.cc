@@ -43,11 +43,18 @@
 #include <G4SubtractionSolid.hh>
 #include <G4LogicalVolume.hh>
 #include <G4PVPlacement.hh>
+#include <G4VPhysicalVolume.hh>
+#include <G4Trd.hh>
+#include <G4Box.hh>
+#include <G4PVPlacement.hh>
 #include <G4SystemOfUnits.hh>
 #include <G4OpticalSurface.hh>
 #include <G4LogicalSkinSurface.hh>
+#include <G4RotationMatrix.hh>
 #include <G4LogicalBorderSurface.hh>
+#include <G4VisAttributes.hh>
 
+#include <algorithm>
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction() {
@@ -64,6 +71,9 @@ DetectorConstruction::DetectorConstruction() {
 
   // Initialize private objects
   detector = DetectorProvider::getDetector(detectorType);
+
+  // Initialize the detector messenger
+  fDetectorMessenger = new DetectorMessenger(this);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -75,28 +85,28 @@ DetectorConstruction::~DetectorConstruction() {
 
 void DetectorConstruction::setCrystalSideA(G4double value) {
   crystalSideA = value;
-  G4RunManager::GetRunManager()->GeometryHasBeenModified();
+  G4RunManager::GetRunManager()->GeometryHasBeenModified(true);
 }
 
 void DetectorConstruction::setCrystalSideB(G4double value) {
   crystalSideB = value;
-  G4RunManager::GetRunManager()->GeometryHasBeenModified();
+  G4RunManager::GetRunManager()->GeometryHasBeenModified(true);
 }
 
 void DetectorConstruction::setCrystalLength(G4double value) {
   crystalLength = value;
-  G4RunManager::GetRunManager()->GeometryHasBeenModified();
+  G4RunManager::GetRunManager()->GeometryHasBeenModified(true);
 }
 
 void DetectorConstruction::setLightGuideLength(G4double value) {
   lightGuideLength = value;
-  G4RunManager::GetRunManager()->GeometryHasBeenModified();
+  G4RunManager::GetRunManager()->GeometryHasBeenModified(true);
 }
 
 void DetectorConstruction::setDetectorType(G4String value) {
   detectorType = value;
   detector = DetectorProvider::getDetector(detectorType);
-  G4RunManager::GetRunManager()->GeometryHasBeenModified();
+  G4RunManager::GetRunManager()->GeometryHasBeenModified(true);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -168,6 +178,17 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
                                                              worldLogical /* parent logical */,
                                                              false /* boolean operation */, 0 /* copy number */,
                                                              checkOverlaps);
+  // Force wrap to render as wireframe
+  G4VisAttributes* wrapLogicalVisAttr = new G4VisAttributes();
+  // crystalWrapLogicalVisAttr->SetForceCloud();
+  // crystalWrapLogicalVisAttr->SetForceNumberOfCloudPoints(1e4);
+  wrapLogicalVisAttr->SetForceWireframe();
+  // wrapLogicalVisAttr->SetForceAuxEdgeVisible();
+  // crystalWrapLogicalVisAttr->SetLineStyle(G4VisAttributes::LineStyle::dotted);
+  // crystalWrapLogicalVisAttr->SetForceWireframe();
+  // crystalWrapLogicalVisAttr->SetForceAuxEdgeVisible();
+  crystalWrapLogical->SetVisAttributes(wrapLogicalVisAttr);
+
   addReflectiveBorder(crystalPhysical, crystalWrapPhysical);
 
   // █░░ █ █▀▀ █░█ ▀█▀   █▀▀ █░█ █ █▀▄ █▀▀
@@ -226,6 +247,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
                                                                   worldLogical /* parent logical */,
                                                                   false /* boolean operation */, 0 /* copy number */,
                                                                   checkOverlaps);
+    lightGuideWrapLogical->SetVisAttributes(wrapLogicalVisAttr);
     addReflectiveBorder(lightGuidePhysical, lightGuideWrapPhysical);
   }
 
@@ -288,6 +310,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
     /*G4VPhysicalVolume* mppcCathodePhysical =*/new G4PVPlacement(0, mppcCathodePosition, mppcCathodeLogical,
                                                                   "mppcCathode", worldLogical, false, 0,
                                                                   checkOverlaps);
+    // Set scoring volume (for Stepping Action)
+    fScoringVolume = mppcCathodeLogical;
 
     // MPPC SHIELD
     G4double shieldLength = mppc->getWindowThickness() + mppc->getCathodeThickness();
@@ -306,12 +330,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
   }
   // always return the physical World
   return worldPhysical;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-AbsDetector* DetectorConstruction::getDetector() {
-  return detector;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -339,4 +357,16 @@ void DetectorConstruction::addReflectiveBorder(G4VPhysicalVolume *volumePhysical
   G4String borderSurfaceName = volumePhysical1->GetName() + volumePhysical2->GetName() + "BorderSurface";
   /*G4LogicalBorderSurface* borderSurface = */new G4LogicalBorderSurface(borderSurfaceName, volumePhysical1,
                                                                          volumePhysical2, surface);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+AbsDetector* DetectorConstruction::getDetector() {
+  return detector;
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+G4double DetectorConstruction::getLightGuideLength(){
+  return lightGuideLength;
 }

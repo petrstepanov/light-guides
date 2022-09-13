@@ -70,8 +70,8 @@ void Utils::printTimer() {
 
   // https://stackoverflow.com/questions/14391327/how-to-get-duration-as-int-millis-and-float-seconds-from-chrono
   std::cout << "Duration is: " << std::chrono::duration_cast<std::chrono::hours>(interval).count() << " hours or "
-      << std::chrono::duration_cast<std::chrono::minutes>(interval).count() << " minutes or "
-      << std::chrono::duration_cast<std::chrono::seconds>(interval).count() << " seconds." << std::endl;
+            << std::chrono::duration_cast<std::chrono::minutes>(interval).count() << " minutes or "
+            << std::chrono::duration_cast<std::chrono::seconds>(interval).count() << " seconds." << std::endl;
 }
 
 Utils *Utils::instance = NULL;
@@ -82,7 +82,6 @@ Utils* Utils::getInstance() {
   }
   return instance;
 }
-
 
 G4double Utils::getGPSMonoEnergy() {
   PrimaryGeneratorAction *primaryGeneratorAction =
@@ -97,20 +96,28 @@ G4double Utils::getGPSMonoEnergy() {
   return particleSource->GetEneDist()->GetMonoEnergy();
 }
 
-/*
-G4double Utils::getGPSZPos() const {
-  PrimaryGeneratorAction *primaryGeneratorAction =
-      (PrimaryGeneratorAction*) G4RunManager::GetRunManager()->GetUserPrimaryGeneratorAction();
-  if (primaryGeneratorAction == NULL)
+G4double Utils::getLightGuideLength() {
+  DetectorConstruction *dc = (DetectorConstruction*) G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+  if (dc == NULL)
     return 0;
 
-  // PS: we're setting energy via "/gps/ene/mono". Therefore energy is saved
-  // in G4SingleParticleSource (check in G4GeneralParticcleSourcceMessenger) which is a member ofG4GeneralParticleSource
-  const G4ParticleGun* particleGun = primaryGeneratorAction->GetParticleGun();
-  G4ThreeVector particlePosition = particleGun->GetParticlePosition();
-  return particlePosition.getZ();
+  return dc->getLightGuideLength();
 }
 
+/*
+ G4double Utils::getGPSZPos() const {
+ PrimaryGeneratorAction *primaryGeneratorAction =
+ (PrimaryGeneratorAction*) G4RunManager::GetRunManager()->GetUserPrimaryGeneratorAction();
+ if (primaryGeneratorAction == NULL)
+ return 0;
+
+ // PS: we're setting energy via "/gps/ene/mono". Therefore energy is saved
+ // in G4SingleParticleSource (check in G4GeneralParticcleSourcceMessenger) which is a member ofG4GeneralParticleSource
+ const G4ParticleGun* particleGun = primaryGeneratorAction->GetParticleGun();
+ G4ThreeVector particlePosition = particleGun->GetParticlePosition();
+ return particlePosition.getZ();
+ }
+ */
 G4String Utils::getGPSParticleName() {
   PrimaryGeneratorAction *primaryGeneratorAction =
       (PrimaryGeneratorAction*) G4RunManager::GetRunManager()->GetUserPrimaryGeneratorAction();
@@ -123,7 +130,7 @@ G4String Utils::getGPSParticleName() {
   G4SingleParticleSource *particleSource = particleGun->GetCurrentSource();
   return particleSource->GetParticleDefinition()->GetParticleName();
 }
-*/
+
 G4int Utils::getNumberOfEvents() {
   G4RunManager *runManager = G4RunManager::GetRunManager();
   G4int nEvents = runManager->GetNumberOfEventsToBeProcessed();
@@ -590,7 +597,7 @@ void Utils::checkCurrentMeshIsClosed() {
   if (currentMesh) {
     G4ExceptionDescription ed;
     ed << "ERROR[" << "DetectorConstruction::InitUnitVolumeScoringMesh()" << "] : Mesh <" << currentMesh->GetWorldName()
-        << "> is still open. Close it first. Command ignored.";
+       << "> is still open. Close it first. Command ignored.";
   }
 }
 
@@ -599,14 +606,14 @@ void Utils::checkUniqueMeshName(G4String meshName) {
   G4VScoringMesh *mesh = scoringManager->FindMesh(meshName);
   if (mesh) {
     G4Exception("Utils::checkUniqueMeshName", "Run Aborted", G4ExceptionSeverity::RunMustBeAborted,
-        "Scoring mesh already exists!");
+                "Scoring mesh already exists!");
   }
 }
 
 void Utils::checkUniqueScorerName(G4VScoringMesh *mesh, G4String psName) {
   if (mesh->FindPrimitiveScorer(psName)) {
     G4Exception("Utils::checkUniqueScorerName", "Run Aborted", G4ExceptionSeverity::RunMustBeAborted,
-        "Primitive scorer already exists!");
+                "Primitive scorer already exists!");
   }
 }
 
@@ -728,13 +735,13 @@ G4String Utils::getCreatorProcessSafe(const G4Track *track) {
 G4String Utils::getOutputFileName(G4String suffix) {
   // Construct filename
   std::stringstream buffer;
-  buffer << "./output/";
 //  buffer << Utils::getCrystalMaterial() << "-";
 //  buffer << Utils::getNCrystalsX() << "x" << Utils::getNCrystalsY() << "-";
 //  buffer << Utils::getCrystalX() << "x" << Utils::getCrystalY() << "x" << Utils::getCrystalZ() << "mm-";
   buffer << Utils::getGPSMonoEnergy() / 1E3 << "GeV-";
   buffer << Utils::getNumberOfEvents() << "events-";
-//  buffer << Utils::getGPSParticleName();
+  buffer << Utils::getGPSParticleName() << "-";
+  buffer << Utils::getLightGuideLength() << "-mm-lightguide-";
 //  if (Utils::getGPSZPos() > 0)
 //    buffer << "+";
 //  if (Utils::getGPSZPos() > 0 && Utils::getGPSZPos() < 100)

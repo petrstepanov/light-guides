@@ -1,9 +1,0 @@
-# /run/numberOfThreads 1
-/run/initialize
-
-/control/execute gps-op-emission-SciGlass-4-1-L.mac
-/gps/pos/centre 0 0 0 mm
-
-#/run/printProgress 10
-/run/beamOn 10
-
