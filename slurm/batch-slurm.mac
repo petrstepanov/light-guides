@@ -40,4 +40,4 @@ sed -i "s;_EVENTS;${EVENTS};g" ${MACROS}
 sed -i "s;_LENGTH;${LENGTHS[$SLURM_ARRAY_TASK_ID]};g" ${MACROS}
 
 # Pass macros to executable
-./lightguides ${MACROS} 
+./lightguides ${MACROS}
