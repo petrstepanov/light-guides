@@ -124,7 +124,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
   G4double maxXY = std::max(crystalSideB, detector->getXYSize());
   G4double worldSizeXY = maxXY;
   G4double worldSizeZ = crystalLength + lightGuideLength + detector->getZSize();
-  worldSizeXY *= 2.;
+  worldSizeXY *= 4.;
   worldSizeZ *= 2.;
   G4Material *worldMaterial = Materials::getInstance()->getMaterial("G4_AIR");
 
@@ -179,7 +179,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
                                                              false /* boolean operation */, 0 /* copy number */,
                                                              checkOverlaps);
   // Force wrap to render as wireframe
-  G4VisAttributes* wrapLogicalVisAttr = new G4VisAttributes();
+  G4VisAttributes *wrapLogicalVisAttr = new G4VisAttributes();
   // crystalWrapLogicalVisAttr->SetForceCloud();
   // crystalWrapLogicalVisAttr->SetForceNumberOfCloudPoints(1e4);
   wrapLogicalVisAttr->SetForceWireframe();
@@ -218,6 +218,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
     G4Trd *lightGuideSolid = new G4Trd("lightGuideSolid", crystalSideB / 2., detectorXY / 2., crystalSideB / 2.,
                                        detectorXY / 2., lightGuideLength / 2.);
     G4Material *lightGuideMaterial = Materials::getInstance()->getMaterial("PMMA");
+
     G4LogicalVolume *lightGuideLogical = new G4LogicalVolume(lightGuideSolid, lightGuideMaterial, "lightGuideLogical");
 
     G4ThreeVector lightGuidePosition = G4ThreeVector(0, 0, z1 + greaseThickness + lightGuideLength / 2.);
@@ -231,16 +232,17 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
     G4Trd *lightGuideWrapASolid = new G4Trd("lightGuideWrapASolid", (crystalSideB + 2. * wrapThickness) / 2.,
                                             (detectorXY + 2. * wrapThickness) / 2.,
                                             (crystalSideB + 2. * wrapThickness) / 2.,
-                                            (detectorXY + 2. * wrapThickness) / 2.,
-                                            lightGuideLength / 2.);
-    G4Trd *lightGuideWrapBSolid = new G4Trd("lightGuideWrapBSolid", crystalSideB / 2., detectorXY / 2.,
-                                            crystalSideB / 2., detectorXY / 2., lightGuideLength / 2.);
+                                            (detectorXY + 2. * wrapThickness) / 2., lightGuideLength / 2.);
+    // Tip: added 1 nanometer because "Stuck Track: potential geometry or navigation problem." between "lightGuideWrap" and "grease"
+    G4Trd *lightGuideWrapBSolid = new G4Trd("lightGuideWrapBSolid", crystalSideB / 2., detectorXY / 2. + 1 * nanometer,
+                                            crystalSideB / 2., detectorXY / 2. + 1 * nanometer, lightGuideLength / 2.);
 
     G4SubtractionSolid *lightGuideWrapSolid = new G4SubtractionSolid("lightGuideWrapSolid", lightGuideWrapASolid,
                                                                      lightGuideWrapBSolid, noRotation,
                                                                      G4ThreeVector(0, 0, 0));
 
-    G4LogicalVolume *lightGuideWrapLogical = new G4LogicalVolume(lightGuideWrapSolid, wrapMaterial, "lightGuideWrapLogical");
+    G4LogicalVolume *lightGuideWrapLogical = new G4LogicalVolume(lightGuideWrapSolid, wrapMaterial,
+                                                                 "lightGuideWrapLogical");
     G4VPhysicalVolume *lightGuideWrapPhysical = new G4PVPlacement(0 /* rotation */, lightGuidePosition /* position */,
                                                                   lightGuideWrapLogical /* logical volume */,
                                                                   "lightGuideWrap" /* name */,
@@ -268,21 +270,22 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
       G4ThreeVector greasePosition = G4ThreeVector(0, 0, zDet + greaseThickness / 2.);
       /* G4VPhysicalVolume *greasePhysical = */new G4PVPlacement(0 /* rotation */, greasePosition /* position */,
                                                                  greaseLogical /* logical volume */,
-                                                                 "grease" /* name */,
-                                                                 worldLogical /* parent logical */,
+                                                                 "grease" /* name */, worldLogical /* parent logical */,
                                                                  false /* boolean operation */, 0 /* copy number */,
                                                                  checkOverlaps);
     }
 
     // MPPC REFLECTOR
     // Here the reflector thickness is same as grease thickness
-    G4Box *mppcReflectorOuter = new G4Box("mppcReflectorOuterSolid", 0.5 * (maxXY + wrapThickness*2), 0.5 * (maxXY + wrapThickness*2), 0.5 * greaseThickness);
+    G4Box *mppcReflectorOuter = new G4Box("mppcReflectorOuterSolid", 0.5 * (maxXY + wrapThickness * 2),
+                                          0.5 * (maxXY + wrapThickness * 2), 0.5 * greaseThickness);
     G4Box *mppcReflectorInner = new G4Box("mppcReflectorInnerSolid", 0.5 * mppc->getXYSize(), 0.5 * mppc->getXYSize(),
                                           0.5 * greaseThickness);
     G4SubtractionSolid *mppcReflectorSolid = new G4SubtractionSolid("mppcReflectorSolid", mppcReflectorOuter,
                                                                     mppcReflectorInner, noRotation, G4ThreeVector());
 
-    G4LogicalVolume *mppcReflectorLogical = new G4LogicalVolume(mppcReflectorSolid, wrapMaterial, "mppcReflectorLogical");
+    G4LogicalVolume *mppcReflectorLogical = new G4LogicalVolume(mppcReflectorSolid, wrapMaterial,
+                                                                "mppcReflectorLogical");
     G4ThreeVector mppcReflectorPosition = G4ThreeVector(0, 0, zDet + greaseThickness / 2.);
     /*G4VPhysicalVolume* mppcReflectorPhysical =*/new G4PVPlacement(0, mppcReflectorPosition, mppcReflectorLogical,
                                                                     "mppcReflector", worldLogical, false, 0,
@@ -293,12 +296,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
     // MPPC WINDOW
     G4Box *mppcWindowSolid = new G4Box("mppcWindowSolid", 0.5 * mppc->getXYSize(), 0.5 * mppc->getXYSize(),
                                        0.5 * mppc->getWindowThickness());
-    G4LogicalVolume *mppcWindowLogical = new G4LogicalVolume(mppcWindowSolid, mppc->getWindowMaterial(), "mppcWindowLogical");
+    G4LogicalVolume *mppcWindowLogical = new G4LogicalVolume(mppcWindowSolid, mppc->getWindowMaterial(),
+                                                             "mppcWindowLogical");
     G4ThreeVector mppcWindowPosition = G4ThreeVector(0, 0,
                                                      zDet + greaseThickness + detector->getWindowThickness() / 2.);
-    /*G4VPhysicalVolume* mppcWindowPhysical =*/new G4PVPlacement(0, mppcWindowPosition, mppcWindowLogical,
-                                                                 "mppcWindow", worldLogical, false, 0,
-                                                                 checkOverlaps);
+    /*G4VPhysicalVolume* mppcWindowPhysical =*/new G4PVPlacement(0, mppcWindowPosition, mppcWindowLogical, "mppcWindow",
+                                                                 worldLogical, false, 0, checkOverlaps);
 
     // MPPC CATHODE
     G4Box *mppcCathodeSolid = new G4Box("mppcCathodeSolid", 0.5 * mppc->getXYSize(), 0.5 * mppc->getXYSize(),
@@ -308,14 +311,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
     G4ThreeVector mppcCathodePosition = G4ThreeVector(
         0, 0, zDet + greaseThickness + detector->getWindowThickness() + mppc->getCathodeThickness() / 2.);
     /*G4VPhysicalVolume* mppcCathodePhysical =*/new G4PVPlacement(0, mppcCathodePosition, mppcCathodeLogical,
-                                                                  "mppcCathode", worldLogical, false, 0,
-                                                                  checkOverlaps);
+                                                                  "mppcCathode", worldLogical, false, 0, checkOverlaps);
     // Set scoring volume (for Stepping Action)
     fScoringVolume = mppcCathodeLogical;
 
     // MPPC SHIELD
     G4double shieldLength = mppc->getWindowThickness() + mppc->getCathodeThickness();
-    G4Box *mppcShieldASolid = new G4Box("mppcShieldASolid", 0.5 * (maxXY + wrapThickness*2), 0.5 * (maxXY + wrapThickness*2), 0.5 * shieldLength);
+    G4Box *mppcShieldASolid = new G4Box("mppcShieldASolid", 0.5 * (maxXY + wrapThickness * 2),
+                                        0.5 * (maxXY + wrapThickness * 2), 0.5 * shieldLength);
     G4Box *mppcShieldBSolid = new G4Box("mppcShieldBSolid", 0.5 * mppc->getXYSize(), 0.5 * mppc->getXYSize(),
                                         0.5 * shieldLength);
     G4SubtractionSolid *mppcShieldSolid = new G4SubtractionSolid("mppcShieldSolid", mppcShieldASolid, mppcShieldBSolid,
@@ -323,9 +326,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
     G4Material *mppcShieldMaterial = Materials::getInstance()->getMaterial("MuMetal");
     G4LogicalVolume *mppcShieldLogical = new G4LogicalVolume(mppcShieldSolid, mppcShieldMaterial, "mppcShieldLogical");
     G4ThreeVector mppcShieldPosition = G4ThreeVector(0, 0, zDet + greaseThickness + shieldLength / 2.);
-    /*G4VPhysicalVolume* mppcShieldPhysical =*/new G4PVPlacement(0, mppcShieldPosition, mppcShieldLogical,
-                                                                 "mppcShield", worldLogical, false, 0,
-                                                                 checkOverlaps);
+    /*G4VPhysicalVolume* mppcShieldPhysical =*/new G4PVPlacement(0, mppcShieldPosition, mppcShieldLogical, "mppcShield",
+                                                                 worldLogical, false, 0, checkOverlaps);
 
   }
   // always return the physical World
@@ -367,6 +369,6 @@ AbsDetector* DetectorConstruction::getDetector() {
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4double DetectorConstruction::getLightGuideLength(){
+G4double DetectorConstruction::getLightGuideLength() {
   return lightGuideLength;
 }

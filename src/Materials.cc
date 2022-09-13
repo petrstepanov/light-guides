@@ -1619,12 +1619,13 @@ Materials::Materials() : fMaterialsList { }
   // https://eljentechnology.com/products/light-guides-and-acrylic-plastic
   // https://eljentechnology.com/images/products/data_sheets/Light_Guides_and_Acrylic_Plastic.pdf
   // https://omnexus.specialchem.com/selection-guide/polymethyl-methacrylate-pmma-acrylic-plastic
-  {
-    G4Material *material = new G4Material("PMMA", 1.18 * g / cm3, 3, kStateSolid);
-    material->AddElement(elements->getElement("C"), 5);
-    material->AddElement(elements->getElement("H"), 8);
-    material->AddElement(elements->getElement("O"), 2);
+  // https://en.wikipedia.org/wiki/Poly(methyl_methacrylate)
 
+  G4Material *pmma = new G4Material("PMMA", 1.18 * g / cm3, 3, kStateSolid);
+  pmma->AddElement(elements->getElement("C"), 5);
+  pmma->AddElement(elements->getElement("O"), 2);
+  pmma->AddElement(elements->getElement("H"), 8);
+  {
     G4MaterialPropertiesTable *mpt = new G4MaterialPropertiesTable();
 
     std::vector<G4double> refractiveIndex = { 436, 1.502, 589, 1.492 };
@@ -1633,20 +1634,29 @@ Materials::Materials() : fMaterialsList { }
 
     // Absorption coefficient 0.15344 cm-1 => 6.517205422 cm
     // https://sci-hub.ru/https://doi.org/10.1002/app.1992.070461009
-    std::vector<G4double> transmittance = { 303.10, 0, 319.44, 25.49, 340.28, 57.94, 366.76, 80.80, 394.37, 89.49,
-                                            464.79, 92.46, 562.82, 93.37, 658.03, 93.60, 800.00, 93.60 };
-    G4MaterialPropertyVector *transmittanceMPV = nmToMPV(transmittance);
-    G4double transmittanceDistance = 1 * cm;
+    //std::vector<G4double> transmittance = { 303.10, 0, 319.44, 25.49, 340.28, 57.94, 366.76, 80.80, 394.37, 89.49,
+    //                                        464.79, 92.46, 562.82, 93.37, 658.03, 93.60, 800.00, 93.60};
+    //G4MaterialPropertyVector *transmittanceMPV = nmToMPV(transmittance);
+    //G4double transmittanceDistance = 1 * cm;
 
-    // Absorption length
+    // Absorption length 105 mm UVT
+    //G4MaterialPropertyVector *absLengthMPV = calcAbsorptionLength(mpt, refractiveIndexMPV, transmittanceMPV,
+    //                                                              transmittanceDistance);
+
+    // https://eljentechnology.com/products/light-guides-and-acrylic-plastic
+    std::vector<G4double> transmittance = { 301.0, 0, 304.8, 1.6, 310.3, 20.2, 322.4, 39.7, 339.4, 60.1, 351.8, 72.3,
+                                            376.8, 84.3, 408.2, 88.6, 443.5, 90.9, 475.2, 91.6, 499.1, 92.0 };
+    G4MaterialPropertyVector *transmittanceMPV = nmToMPV(transmittance);
+    G4double transmittanceDistance = 105 * mm;
     G4MaterialPropertyVector *absLengthMPV = calcAbsorptionLength(mpt, refractiveIndexMPV, transmittanceMPV,
                                                                   transmittanceDistance);
     mpt->AddProperty("ABSLENGTH", absLengthMPV, true);
-    material->SetMaterialPropertiesTable(mpt);
-    printMaterialProperties(material);
-    fMaterialsList.push_back(material);
-    // saveMaterial(material);
+
+    pmma->SetMaterialPropertiesTable(mpt);
   }
+  printMaterialProperties(pmma);
+  fMaterialsList.push_back(pmma);
+  // saveMaterial(pmma);
 }
 
 Materials::~Materials() {

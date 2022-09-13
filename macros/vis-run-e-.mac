@@ -4,7 +4,8 @@
 # /control/execute gps-op-emission-SciGlass-4-1-L.mac
 
 /control/execute gps-default.mac
-/gps/ene/mono 10 MeV
+/gps/ene/mono 4 GeV
+/gps/pos/centre 0. 0. 0 cm
 
 #/run/printProgress 10
-/run/beamOn 10
+/run/beamOn 1
