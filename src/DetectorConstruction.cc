@@ -128,12 +128,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
   worldSizeZ *= 2.;
   G4Material *worldMaterial = Materials::getInstance()->getMaterial("G4_AIR");
 
-  G4Box *worldSolid = new G4Box("worldSolid" /* name */, 0.5 * worldSizeXY /* size x */, 0.5 * worldSizeXY /* size y */,
+  G4Box *worldSolid = new G4Box("World" /* name */, 0.5 * worldSizeXY /* size x */, 0.5 * worldSizeXY /* size y */,
                                 0.5 * worldSizeZ /* size z */);
   G4LogicalVolume *worldLogical = new G4LogicalVolume(worldSolid /* its solid */, worldMaterial /* its material */,
-                                                      "worldLogical" /* its name */);
+                                                      "World" /* its name */);
   G4VPhysicalVolume *worldPhysical = new G4PVPlacement(0 /* rotation */, G4ThreeVector() /* position */,
-                                                       worldLogical /* logical volume */, "world" /* name */,
+                                                       worldLogical /* logical volume */, "World" /* name */,
                                                        0 /* parent logical */, false /* boolean operation */,
                                                        0 /* copy number */, checkOverlaps);
 
