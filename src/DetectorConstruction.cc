@@ -64,6 +64,7 @@ DetectorConstruction::DetectorConstruction() {
   crystalLength = DetectorMessenger::crystalLengthCmdDefaultValue;
   detectorType = DetectorMessenger::detectorTypeCmdDefaultValue;
   lightGuideLength = DetectorMessenger::lightGuideLengthCmdDefaultValue;
+  hasReflector = DetectorMessenger::hasReflectorCmdDefaultValue;
 
   // Initialize default values
   wrapThickness = 65 * micrometer;
@@ -264,7 +265,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
     // GREASE
     if (greaseThickness > 0) {
       G4double detectorXY = detector->getXYSize();
-      G4Box *greaseSolid = new G4Box("greaseSolid", detectorXY / 2., detectorXY / 2., greaseThickness / 2.);
+      G4double greaseWidthHeight = hasReflector ? detectorXY : maxXY + wrapThickness * 2; // either fits into the reflector window : or covers up the shielding
+      G4Box *greaseSolid = new G4Box("greaseSolid", greaseWidthHeight / 2., greaseWidthHeight / 2., greaseThickness / 2.);
       G4Material *greaseMaterial = Materials::getInstance()->getMaterial("BC630");
       G4LogicalVolume *greaseLogical = new G4LogicalVolume(greaseSolid, greaseMaterial, "greaseLogical");
       G4ThreeVector greasePosition = G4ThreeVector(0, 0, zDet + greaseThickness / 2.);

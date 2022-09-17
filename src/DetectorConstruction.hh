@@ -72,6 +72,8 @@ class DetectorConstruction: public G4VUserDetectorConstruction {
     void setCrystalLength(G4double value);
     G4double lightGuideLength;
     void setLightGuideLength(G4double value);
+    G4bool hasReflector;
+    void setHasReflector(G4bool value);
     G4String detectorType;
     void setDetectorType(G4String value);
 

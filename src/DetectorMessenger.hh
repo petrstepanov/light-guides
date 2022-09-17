@@ -14,6 +14,7 @@
 #include <G4SystemOfUnits.hh>
 #include <G4UIcmdWithADoubleAndUnit.hh>
 #include <G4UIcmdWithAString.hh>
+#include <G4UIcmdWithABool.hh>
 
 class DetectorConstruction;
 class G4UIdirectory;
@@ -37,6 +38,7 @@ private:
   G4UIcmdWithADoubleAndUnit*   fCrystalSizeACmd;
   G4UIcmdWithADoubleAndUnit*   fCrystalSizeBCmd;
   G4UIcmdWithADoubleAndUnit*   fCrystalLengthCmd;
+  G4UIcmdWithABool*            fHasReflectorCmd;
   G4UIcmdWithADoubleAndUnit*   fLightGuideLengthCmd;
   G4UIcmdWithAString*          fDetectorTypeCmd;
 
@@ -46,6 +48,7 @@ public:
   static constexpr G4double crystalSizeBCmdDefaultValue = 6*cm;
   static constexpr G4double crystalLengthCmdDefaultValue = 40*cm;
   static constexpr G4double lightGuideLengthCmdDefaultValue = 8*cm;
+  static const G4bool hasReflectorCmdDefaultValue = true;
   static const G4String detectorTypeCmdDefaultValue;
 };
 #endif /* SRC_DETECTORMESSENGER_H_ */

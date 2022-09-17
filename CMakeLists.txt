@@ -65,3 +65,8 @@ add_dependencies(${CMAKE_PROJECT_NAME} output_dir)
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
 install(TARGETS lightguides DESTINATION bin)
+
+#----------------------------------------------------------------------------
+# Build the draw scripts
+#
+add_subdirectory (draw)
