@@ -23,26 +23,31 @@ include(${Geant4_USE_FILE})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 #----------------------------------------------------------------------------
-# Locate sources and headers for this project
-# NB: headers are included so they will show up in IDEs
+# Locate SOURCES and HEADERS for this project
+# NB: HEADERS are included so they will show up in IDEs
 #
-set(MAIN_CPP "${PROJECT_SOURCE_DIR}/src/lightguides.cc")
-file(GLOB_RECURSE sources CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.cc)
-list(REMOVE_ITEM ${sources} ${MAIN_CPP})
+# set(MAIN_CPP "${PROJECT_SOURCE_DIR}/src/lightguides.cc")
 
-file(GLOB_RECURSE headers CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.hh)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.cc)
+message (STATUS "Found list of sources: ${SOURCES}")
+#list(REMOVE_ITEM ${SOURCES} ${MAIN_CPP})
+
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.hh)
+message (STATUS "Found list of headers: ${HEADERS}")
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
 set(EXECUTABLE_TARGET ${PROJECT_NAME}-bin)
-add_executable(${EXECUTABLE_TARGET} ${MAIN_CPP} ${sources} ${headers})
+add_executable(${EXECUTABLE_TARGET} ${SOURCES} ${HEADERS})
 target_link_libraries(${EXECUTABLE_TARGET} ${Geant4_LIBRARIES})
 
 #----------------------------------------------------------------------------
 # Set executable output name
 #
-get_filename_component(EXECUTABLE_NAME "${MAIN_CPP}" NAME_WE)
+#get_filename_component(EXECUTABLE_NAME "${MAIN_CPP}" NAME_WE)
+get_filename_component(EXECUTABLE_NAME "${PROJECT_NAME}" NAME_WE)
+string(TOLOWER "${EXECUTABLE_NAME}" EXECUTABLE_NAME)
 set_property(TARGET ${EXECUTABLE_TARGET} PROPERTY OUTPUT_NAME ${EXECUTABLE_NAME})
 
 #----------------------------------------------------------------------------
