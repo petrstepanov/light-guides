@@ -11,6 +11,12 @@ project(draw LANGUAGES CXX)
 # ROOT 6.10+ supports config file discovery
 find_package(ROOT REQUIRED COMPONENTS RooFit RooFitCore Gui)
 
+# Obtain ROOT CXX standard
+message(STATUS "ROOT_CXX_FLAGS: ${ROOT_CXX_FLAGS}")
+string(REGEX MATCH "-std=c\\+\\+([0-9]+)" ROOT_CXX_STANDARD "${ROOT_CXX_FLAGS}")
+set(ROOT_CXX_STANDARD "${CMAKE_MATCH_1}")
+message(STATUS "ROOT_CXX_STANDARD: ${ROOT_CXX_STANDARD}")
+
 # TODO: try just this
 # find_package(ROOT CONFIG REQUIRED)
 
@@ -55,6 +61,8 @@ file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
 
 
 # Obtain ROOT CXX standard
+
+
 # TODO: add this standard to compilation
 message(STATUS "Found ROOT C++ standard: ${ROOT_CXX_FLAGS}")
 
