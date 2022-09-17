@@ -26,15 +26,16 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # Locate sources and headers for this project
 # NB: headers are included so they will show up in IDEs
 #
+#set(MAIN_CPP "${PROJECT_SOURCE_DIR}/src/lightguides.cpp")
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.cc)
-list(REMOVE_ITEM ${sources} lightguides.cc)
+#list(REMOVE_ITEM ${sources} ${MAIN_CPP})
 
 file(GLOB_RECURSE headers CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/src/*.hh)
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
-add_executable(${CMAKE_PROJECT_NAME} ${PROJECT_SOURCE_DIR}/src/lightguides.cc ${sources} ${headers})
+add_executable(${CMAKE_PROJECT_NAME} ${sources} ${headers})
 target_link_libraries(${CMAKE_PROJECT_NAME} ${Geant4_LIBRARIES})
 
 #----------------------------------------------------------------------------

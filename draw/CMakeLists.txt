@@ -59,18 +59,6 @@ file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
 # message(STATUS "Found list of dependent C++ header files:")
 # message(STATUS "${HEADERS}")                  
 
-
-# Obtain ROOT CXX standard
-
-
-# TODO: add this standard to compilation
-message(STATUS "Found ROOT C++ standard: ${ROOT_CXX_FLAGS}")
-
-#message(STATUS "Library dirs: ${LIBRARY_DIRS}")
-#string(REPLACE ":" ";" LIBRARY_DIRS $ENV{LD_LIBRARY_PATH})
-#message(STATUS "Library dirs: ${LIBRARY_DIRS}")
-
-
 message(STATUS "LD_LIBRARY_PATH: $ENV{LD_LIBRARY_PATH}")
 
 # Compose list of ROOT libraries with "ROOT::" prefix
