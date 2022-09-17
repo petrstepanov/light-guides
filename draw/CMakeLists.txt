@@ -3,7 +3,7 @@
 # https://cliutils.gitlab.io/modern-cmake/examples/root-dict/
 
 # Assert CMake version
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 # This is your project statement. You should always list languages
 project(draw LANGUAGES CXX)
