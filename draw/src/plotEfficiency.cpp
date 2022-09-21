@@ -4,6 +4,7 @@
 
 #include <CanvasHelper.h>
 
+#include <RtypesCore.h>
 #include <TObjString.h>
 #include <TStyle.h>
 #include <TSystem.h>
@@ -15,6 +16,10 @@
 int plotEfficiency() {
   // Get list of files from the UI
   TList *files = UiUtils::getFileNamesList("Select ROOT files with PE output for different light guide length", kTRUE);
+
+  // Iterate through files and find maximum nPE branch value across all files
+  // This is for the light yield plots to look nicely consistent between each other
+  Double_t xAxisMax = 0.75 * FileUtils::getBranchMaximumInFiles(files, "lightguides", "nPE");
 
   // Prepare arrays for nPE(guideLength) plot and resolution(guideLength)
   std::vector<Double_t> guideLengths = { };
@@ -52,7 +57,7 @@ int plotEfficiency() {
     TString histName = TString::Format("hist-%dmm", guideLength);
     TString histTitle = TString::Format("Light Guide %d mm", guideLength);
     // Int_t maxPE = FileUtils::getBranchMaximum(tree, "nPE")*0.3;
-    TH1 *hist = new TH1I(histName.Data(), histTitle.Data(), 150, 0, 5000);
+    TH1 *hist = new TH1I(histName.Data(), histTitle.Data(), 150, 0, xAxisMax);
     hist->GetXaxis()->SetTitle("Number of Photo-Electrons per Event");
     hist->GetYaxis()->SetTitle("Counts");
 

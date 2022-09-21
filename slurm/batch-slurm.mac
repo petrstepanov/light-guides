@@ -6,18 +6,18 @@
 #SBATCH --time=12:00:00
 #SBATCH --output=npe_%A_%a.out
 #SBATCH --error=npe_%A_%a.err
-#SBATCH --array=0-7
+#SBATCH --array=0-12
 
 # Number of events
-EVENTS=500
+EVENTS=1500
 
 # Incident particle energy (GeV)
 ENERGY=4
 
 # Define waveguide length energy array (slurm does not support float values)
 # We can use slurm array as index for our array with float incident energies
-LENGTHS=(0      5      10     20     30     50     75     100)
-# Index  0      1      2      3      4      5      6      7
+LENGTHS=(0      5      10     15     20     25     30     35     40     45     50     75     100)
+# Index  0      1      2      3      4      5      6      7      8      9      10     11     12
 
 # Template and output Geant4 macro names
 TEMPLATE_MACROS=./macros/batch-slurm-template.mac
