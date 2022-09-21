@@ -12,10 +12,9 @@ project(draw LANGUAGES CXX)
 find_package(ROOT REQUIRED COMPONENTS RooFit RooFitCore Gui)
 
 # Obtain ROOT CXX standard
-message(STATUS "ROOT_CXX_FLAGS: ${ROOT_CXX_FLAGS}")
 string(REGEX MATCH "-std=c\\+\\+([0-9]+)" ROOT_CXX_STANDARD "${ROOT_CXX_FLAGS}")
 set(ROOT_CXX_STANDARD "${CMAKE_MATCH_1}")
-message(STATUS "ROOT_CXX_STANDARD: ${ROOT_CXX_STANDARD}")
+message(STATUS "Found ROOT CXX standard: ${ROOT_CXX_STANDARD}")
 
 # TODO: try just this
 # find_package(ROOT CONFIG REQUIRED)
@@ -77,11 +76,16 @@ list(APPEND LIB_NAMES "ROOT::Html")
 list(APPEND LIB_NAMES "ROOT::Minuit")
 list(APPEND LIB_NAMES "ROOT::Fumili")
 
-# Find my custom CanvasHelper shared library and add it to the . 
+# Find custom CanvasHelper shared library and add it to the . 
 # First parameter here is result of found library - its location. Refer to CMake docs how to find in Env Variable
 find_library(CH_LIBRARY_LOCATION CanvasHelper PATHS ENV LD_LIBRARY_PATH)
 message(STATUS "Found CanvasHelper library: ${CH_LIBRARY_LOCATION}")
 list(APPEND LIB_NAMES "${CH_LIBRARY_LOCATION}")
+
+# Find custom CanvasHelper shared library and add it to the . 
+find_library(RU_LIBRARY_LOCATION RootUtils PATHS ENV LD_LIBRARY_PATH)
+message(STATUS "Found RootUtils library: ${RU_LIBRARY_LOCATION}")
+list(APPEND LIB_NAMES "${RU_LIBRARY_LOCATION}")
 
 # List all the found libraries
 message(STATUS "All libraries to link the shared library: ${LIB_NAMES}")
