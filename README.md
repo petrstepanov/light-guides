@@ -45,5 +45,7 @@ Cumulative graphs of registered number of PE along with the optical resolution f
 
 ## Results
 
-Optical simulations on the Farm for 0, 5, ...(step 5 mm), … 60, 80, and 100 mm light guide length are finished. 4 GeV electrons, trapezoidal SciGlass scintillation crystal, 6x6 SiPM matrix with 36x36 mm² surface area. ROOT plotting scripts are added to the Light Guides repository. Registered PE/Event and corresponding energy resolutions are plotted. ** Minimum reasonable light guide length is estimated to be 30 mm**.
+Optical simulations on the Farm for 0, 5, ...(step 5 mm), … 60, 80, and 100 mm light guide length are finished. 4 GeV electrons, trapezoidal SciGlass scintillation crystal, 6x6 SiPM matrix with 36x36 mm² surface area. ROOT plotting scripts are added to the Light Guides repository. 
+
+Registered PE/Event and corresponding energy resolutions are plotted. **Minimum reasonable light guide length is estimated to be 30 mm**.
 
