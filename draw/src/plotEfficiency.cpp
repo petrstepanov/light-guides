@@ -15,10 +15,11 @@
 
 int plotEfficiency() {
   // Get list of files from the UI
-  TList *files = UiUtils::getFileNamesList("Select ROOT files with PE output for different light guide length", kTRUE);
+  UiUtils::showMessageBox("Select series of ROOT files with PE output for different light guide length");
+  TList *files = UiUtils::getFilePaths();
 
   // Iterate through files and find maximum nPE branch value across all files
-  // This is for the light yield plots to look nicely consistent between each other
+  // This is for the light yield plots for each light guide length to have uniform scale along X axis
   Double_t xAxisMax = 0.75 * FileUtils::getBranchMaximumInFiles(files, "lightguides", "nPE");
 
   // Prepare arrays for nPE(guideLength) plot and resolution(guideLength)
@@ -43,8 +44,9 @@ int plotEfficiency() {
     // tree->SetBranchAddress("guideLength", &gL);
     // tree->GetEntry(1);
     // guideLengths.push_back(gL);
-    TString fileName = gSystem->BaseName(fileNamePath);
-    TObjArray *objArray = TPRegexp("(\\d+)-mm").MatchS(fileName);
+    PathComponents filePath = FileUtils::parseFilePath(fileNamePath.Data());
+
+    TObjArray *objArray = TPRegexp("(\\d+)-mm").MatchS(filePath.name);
     if (objArray->GetLast() < 1) {
       Error("plotEfficiency()", "Cannot parse file name");
       exit(1);
@@ -66,7 +68,7 @@ int plotEfficiency() {
     tree->Draw(drawOption, "", "goff");
 
     // Create canvas before TH1::Fit(), otherwise default canvas is created
-    TCanvas *canvas = new TCanvas(fileName.Data(), fileName.Data());
+    TCanvas *canvas = new TCanvas();
     canvas->SetWindowSize(500, 400);
     canvas->SetGrid();
 
@@ -97,8 +99,12 @@ int plotEfficiency() {
 
     // Beautify the canvas
     TPave *pave = CanvasHelper::getDefaultPaveStats(canvas);
-    CanvasHelper::setPaveAlignment(pave, CanvasHelper::kPaveAlignRight | CanvasHelper::kPaveAlignTop);
+    CanvasHelper::setPaveAlignment(pave, kPaveAlignRight | kPaveAlignTop);
     CanvasHelper::getInstance()->addCanvas(canvas);
+
+    // Save canvas to file
+    canvas->SetName(filePath.name);
+    CanvasHelper::saveCanvas(canvas, kFormatPng);
   }
 
   // Prepare canvas for plotting joint light guide data
@@ -141,6 +147,10 @@ int plotEfficiency() {
 
   // Beautify the canvas
   CanvasHelper::getInstance()->addCanvas(canvas);
+
+  // Save canvas to file
+  canvas->SetName("light-guides-light-yield");
+  CanvasHelper::saveCanvas(canvas, kFormatPng);
 
   return 0;
 }
