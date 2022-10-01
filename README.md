@@ -12,7 +12,7 @@ Program evaluates the best length of a lightguide required to obtain maximum lig
 * Sensitive detector part is 6x6 array of [S13360_6025CS SiPMs](https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/99_SALES_LIBRARY/ssd/s13360_series_kapd1052e.pdf) with silicone resin window. 
 
 ![Geant4 detector geometry](https://raw.githubusercontent.com/petrstepanov/light-guides/main/resources/light-guides-detector.png "Geant4 detector geometry")
-*Detector geometry. Top: 5 cm light guide. Bottom: no light guide.*
+<center>*Detector geometry. Top: 5 cm light guide. Bottom: no light guide.*</center>
 
 ## Validating Photon Trajectories
 
