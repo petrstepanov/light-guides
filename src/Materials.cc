@@ -6,20 +6,14 @@
  */
 
 #include <G4SystemOfUnits.hh>
-#include <Elements.hh>
 #include <G4ios.hh>
 #include <G4MaterialPropertiesTable.hh>
 #include <G4NistManager.hh>
 #include <G4PhysicsVector.hh>
 #include <G4String.hh>
 #include <G4Types.hh>
-#include <G4Utils.hh>
-#include <Materials.hh>
 #include <stdlib.h>
-#include <TAttMarker.h>
-#include <TString.h>
-//#include <TVectorDfwd.h>
-#include <TSystem.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -30,10 +24,9 @@
 #include <map>
 #include <string>
 
-#include <TSystem.h>
-#include <TGraph.h>
-#include <TVectorD.h>
-#include <TFile.h>
+#include "Materials.hh"
+#include "Elements.hh"
+#include "Utils.hh"
 
 Materials* Materials::fgInstance = nullptr;
 
@@ -1349,8 +1342,9 @@ void Materials::generateEmissionMacro(G4Material* material){
   G4MaterialPropertiesTable* mpt = material->GetMaterialPropertiesTable();
 
   // TODO: sum vectors from sfast and slow components
-  G4MaterialPropertyVector* mpv = mpt->GetProperty("SCINTILLATIONCOMPONENT1");
-
+  G4MaterialPropertyVector* mpv1 = mpt->GetProperty("SCINTILLATIONCOMPONENT1");
+  G4MaterialPropertyVector* mpv2 = mpt->GetProperty("SCINTILLATIONCOMPONENT2");
+  G4double sy1 = mpt->GetConstProperty("SCINTILLATIONYIELD1");
   G4String emissionFilename = "macros/gps-op-emission-" + material->GetName() + ".mac";
 
   std::ofstream myfile;
@@ -1362,6 +1356,8 @@ void Materials::generateEmissionMacro(G4Material* material){
   myfile << "/gps/pos/type Point" << std::endl;
   myfile << "/gps/ang/type iso" << std::endl;
   myfile << std::endl;
+//  myfile << "/gps/number 1000000" << std::endl;
+//  myfile << std::endl;
   myfile << "# In example #18" << std::endl;
 
   // These line for user-defined histogram
@@ -1373,10 +1369,12 @@ void Materials::generateEmissionMacro(G4Material* material){
   myfile << "/gps/hist/type arb" << std::endl;
 
   myfile << std::endl;
-  for (int i = 0; i<(int)mpv->GetVectorLength(); i++){
-    G4double e = mpv->Energy(i);
+  for (int i = 0; i<(int)mpv1->GetVectorLength(); i++){
+    G4double e = mpv1->Energy(i);
     G4bool b = true;
-    G4double value = mpv->GetValue(e, b);
+    G4double value1 = mpv1->GetValue(e, b);
+    G4double value2 = mpv2->GetValue(e, b);
+    G4double value = sy1*value1 + (1-sy1)*value2;
     myfile << "/gps/hist/point " << e << " " << value << std::endl;
   }
   myfile << std::endl;
