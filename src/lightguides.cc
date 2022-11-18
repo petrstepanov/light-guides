@@ -114,6 +114,8 @@ int main(int argc,char** argv)
 
   delete visManager;
   delete runManager;
+
+  return 0;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....

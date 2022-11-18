@@ -65,6 +65,13 @@ RunAction::RunAction() {
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   analysisManager->SetNtupleMerging(true);
   analysisManager->SetVerboseLevel(1);
+
+  // Book ntuple
+  analysisManager->CreateNtuple("lightguides", "Values per Geant4 event");
+  analysisManager->CreateNtupleIColumn("nPE");
+  analysisManager->CreateNtupleIColumn("eventNumber");
+  analysisManager->CreateNtupleIColumn("guideLength");
+  analysisManager->FinishNtuple();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -90,13 +97,6 @@ void RunAction::BeginOfRunAction(const G4Run*) {
   G4String fileName = "output/";
   fileName += Utils::getOutputFileName();
   analysisManager->OpenFile(fileName);
-
-  // Create ntuple
-  analysisManager->CreateNtuple("lightguides", "Values per Geant4 event");
-  analysisManager->CreateNtupleIColumn("nPE");
-  analysisManager->CreateNtupleIColumn("eventNumber");
-  analysisManager->CreateNtupleIColumn("guideLength");
-  analysisManager->FinishNtuple();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
